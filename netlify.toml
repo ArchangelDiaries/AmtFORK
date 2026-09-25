@@ -3,6 +3,9 @@
   publish = "dist"
   functions = "netlify/functions"
 
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "VITE_FB_API_KEY,VITE_FB_AUTH_DOMAIN,VITE_FB_PROJECT_ID,VITE_FB_APP_ID"
+  
 [[redirects]]
   from = "/api/ork"
   to = "/.netlify/functions/ork"
