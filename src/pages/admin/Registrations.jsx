@@ -3,6 +3,7 @@ import { useApp } from '../../App.jsx';
 import { setCheckIn, removeRegistration } from '../../lib/data.js';
 import { eventDays, fmtDay, toCsv, downloadCsv, slug } from '../../lib/util.js';
 import { ORK_PLAYER_URL } from '../../lib/constants.js';
+import { DIV } from '../../lib/fieldMarshal.js';
 
 export default function Registrations({ id, e, regs, roles, isAuto }) {
   const { toast } = useApp();
@@ -24,7 +25,7 @@ export default function Registrations({ id, e, regs, roles, isAuto }) {
     downloadCsv(`${slug(e.name)}-registrations.csv`, toCsv(rows, [
       { h: 'Persona', v: r => r.persona }, { h: 'Park', v: r => r.park }, { h: 'Kingdom', v: r => r.kingdom },
       { h: 'ORK ID', v: r => r.orkId }, { h: 'Email', v: r => r.email }, { h: 'Days', v: r => (r.days || []).join(' ') },
-      { h: 'Feast', v: r => (r.feast ? 'yes' : 'no') }, { h: 'Checked in', v: r => (r.checkedIn ? 'yes' : 'no') }, { h: 'Notes', v: r => r.notes },
+      { h: 'Feast', v: r => (r.feast ? 'yes' : 'no') }, { h: 'Tournament divisions', v: r => (r.tourneyDivs || []).map(k => DIV[k]?.n || k).join('; ') }, { h: 'Checked in', v: r => (r.checkedIn ? 'yes' : 'no') }, { h: 'Notes', v: r => r.notes },
     ]));
   }
 
@@ -46,7 +47,7 @@ export default function Registrations({ id, e, regs, roles, isAuto }) {
         </div>
         {rows.length ? (
           <div className="scroll"><table>
-            <thead><tr><th>Persona</th><th>Park</th><th>Days</th><th>Feast</th><th>Gate</th>{isAuto && <th></th>}</tr></thead>
+            <thead><tr><th>Persona</th><th>Park</th><th>Days</th><th>Feast</th>{e.warmaster && <th>Tourney</th>}<th>Gate</th>{isAuto && <th></th>}</tr></thead>
             <tbody>{rows.map(r => (
               <tr key={r.id}>
                 <td><b>{r.persona}</b>{r.orkId && <> · <a href={ORK_PLAYER_URL(r.orkId)} target="_blank" rel="noopener" className="hint">ORK #{r.orkId}</a></>}
@@ -54,6 +55,7 @@ export default function Registrations({ id, e, regs, roles, isAuto }) {
                 <td>{r.park}{r.kingdom && <div className="hint">{r.kingdom}</div>}</td>
                 <td className="hint">{(r.days || []).length === days.length ? 'All' : (r.days || []).map(d => fmtDay(d).split(',')[0]).join(', ')}</td>
                 <td>{r.feast ? <span className="pill good">Yes</span> : <span className="muted">No</span>}</td>
+                {e.warmaster && <td className="hint">{(r.tourneyDivs || []).map(k => DIV[k]?.n || k).join(', ') || '—'}</td>}
                 <td>{canGate ? <button className={`btn sm ${r.checkedIn ? '' : 'ghost'}`} onClick={() => gate(r)}>{r.checkedIn ? 'Checked in' : 'Check in'}</button>
                   : r.checkedIn ? <span className="pill good">In</span> : <span className="muted">—</span>}</td>
                 {isAuto && <td><button className={`btn sm ${armed === r.id ? 'danger' : 'ghost'}`} onClick={() => del(r)}>{armed === r.id ? 'Confirm' : 'Remove'}</button></td>}

@@ -17,6 +17,12 @@ export default function Feast({ id, e, prefs, regs, canFeast }) {
     catch (err) { toast('Only the Feastcrat or Autocrat can edit the feast.'); }
   }
 
+  if (!e.feast?.enabled) return (
+    <div className="panel empty"><h2>No feast at this event</h2>
+      <p>Players aren’t asked about feast or dietary needs. If plans change, turn the feast on and the signup form adds those questions.</p>
+      {canFeast && <button className="btn accent" onClick={async () => { try { await updateEvent(id, { 'feast.enabled': true }); toast('Feast turned on.'); } catch (err) { toast('Only the Feastcrat or Autocrat can change that.'); } }}>Add a feast</button>}
+    </div>);
+
   if (!canFeast) return <div className="panel"><h2>Feast</h2><p className="muted">Dietary details are private to the Autocrat and Feastcrat.</p>
     <p>{regs.filter(r => r.feast).length} people signed up for feast.</p></div>;
 

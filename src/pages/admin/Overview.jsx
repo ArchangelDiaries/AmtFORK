@@ -19,6 +19,7 @@ export default function Overview({ id, e, isAuto }) {
       await updateEvent(id, {
         name: f.name, kind: f.kind, park: f.park, startDate: f.startDate, endDate: f.endDate || f.startDate,
         location: f.location || '', address: f.address || '', fieldMarshalUrl: f.fieldMarshalUrl || '', theme: f.theme,
+        'feast.enabled': !!f.feast?.enabled,
       });
       setDirty(false); toast('Saved.');
     } catch (err) { console.error(err); toast('Couldn’t save. Only the Autocrat can edit details.'); }
@@ -69,6 +70,13 @@ export default function Overview({ id, e, isAuto }) {
             <div className="field"><label htmlFor="lc">Site name</label><input id="lc" value={f.location || ''} onChange={x => set({ location: x.target.value })} /></div>
             <div className="field"><label htmlFor="ad">Address</label><input id="ad" value={f.address || ''} onChange={x => set({ address: x.target.value })} /></div>
           </div>
+          <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
+            <legend className="lbl" style={{ marginBottom: 6 }}>Will there be a feast?</legend>
+            <div className="checks">
+              <label className={f.feast?.enabled ? 'on' : ''}><input type="radio" name="ovFeast" checked={!!f.feast?.enabled} onChange={() => set({ feast: { ...(f.feast || {}), enabled: true } })} />Yes, there’s a feast</label>
+              <label className={!f.feast?.enabled ? 'on' : ''}><input type="radio" name="ovFeast" checked={!f.feast?.enabled} onChange={() => set({ feast: { ...(f.feast || {}), enabled: false } })} />No feast</label>
+            </div>
+          </fieldset>
           <div className="field"><label htmlFor="fm">Field Marshal link for the Warmaster Tournament (optional)</label>
             <input id="fm" type="url" value={f.fieldMarshalUrl || ''} onChange={x => set({ fieldMarshalUrl: x.target.value })} placeholder="https://…" /></div>
           <datalist id="parks">{PARKS.map(p => <option key={p} value={p} />)}</datalist>

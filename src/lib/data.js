@@ -40,7 +40,7 @@ export const col = (...p) => collection(db, ...p);
 export const blankEvent = () => ({
   name: '', kind: 'park', park: 'Siar Geata', startDate: '', endDate: '', location: '', address: '',
   theme: { title: '', tagline: '', story: '', accent: '#B07F0C' },
-  feast: { enabled: true, price: '', capacity: '', menu: '', notes: '' },
+  feast: { enabled: false, price: '', capacity: '', menu: '', notes: '' },
   registrationOpen: true, published: false, fieldMarshalUrl: '', crats: {}, notes: {},
 });
 

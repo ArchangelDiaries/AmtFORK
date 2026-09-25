@@ -55,13 +55,14 @@ export default function EventAdmin() {
             {(isOwner && !roles.includes('auto') ? ['auto', ...roles] : roles).map(r => <span key={r} className="pill accent">{ROLE[r]?.n}</span>)}
             <span className={`pill ${e.published ? 'good' : ''}`}>{e.published ? 'Published' : 'Draft'}</span>
             {e.registrationOpen ? <span className="pill good">Registration open</span> : <span className="pill">Registration closed</span>}
+            <span className="pill">{e.feast?.enabled ? 'Feast' : 'No feast'}</span>
           </div>
         </div>
         <Link className="btn ghost" to={`/e/${id}`} target="_blank">View public page</Link>
       </div>
       <nav className="tabs">{TABS.map(t => (
         <button key={t.k} className={tab === t.k ? 'on' : ''} onClick={() => setTab(t.k)}>
-          {t.n}{t.k === 'regs' && regs.rows.length ? ` (${regs.rows.length})` : ''}</button>))}
+          {t.n}{t.k === 'regs' && regs.rows.length ? ` (${regs.rows.length})` : ''}{t.k === 'feast' && !e.feast?.enabled ? ' · off' : ''}</button>))}
       </nav>
       {tab === 'overview' && <Overview {...ctx} />}
       {tab === 'crats' && <Crats {...ctx} />}

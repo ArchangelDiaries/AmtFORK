@@ -17,7 +17,7 @@ export default function Home() {
       <h3>{e.name}</h3>
       {e.theme?.title && <div style={{ fontFamily: 'var(--display)', color: e.theme.accent }}>{e.theme.title}</div>}
       <div className="muted">{fmtRange(e.startDate, e.endDate)}{e.location ? ` · ${e.location}` : ''}</div>
-      {e.registrationOpen && <span className="pill good" style={{ justifySelf: 'start' }}>Registration open</span>}
+      <div className="checks">{e.registrationOpen && <span className="pill good">Registration open</span>}{e.feast?.enabled && <span className="pill">Feast</span>}</div>
     </Link>
   );
   return (

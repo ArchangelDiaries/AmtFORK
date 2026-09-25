@@ -4,6 +4,7 @@ import { saveItem, deleteItem } from '../../lib/data.js';
 import { TRACKS, TRACK, canEditTrack } from '../../lib/constants.js';
 import { eventDays, fmtDay } from '../../lib/util.js';
 import Schedule from '../../components/Schedule.jsx';
+import WarmasterPanel from './WarmasterPanel.jsx';
 
 const PRESETS = {
   court: ['Gate opens', 'Opening Court', 'Closing Court'],
@@ -14,7 +15,7 @@ const PRESETS = {
   meals: ['Breakfast', 'Lunch', 'Feast'],
 };
 
-export default function ScheduleAdmin({ id, e, sched, roles, isOwner }) {
+export default function ScheduleAdmin({ id, e, sched, regs, roles, isOwner, isAuto }) {
   const { toast } = useApp();
   const days = eventDays(e);
   const mine = TRACKS.filter(t => canEditTrack(roles, t.k, isOwner));
@@ -35,6 +36,7 @@ export default function ScheduleAdmin({ id, e, sched, roles, isOwner }) {
 
   return (
     <div className="stack">
+      {(isAuto || roles.includes('war')) && <WarmasterPanel id={id} e={e} regs={regs} sched={sched} />}
       <div className="panel">
         <div className="row" style={{ justifyContent: 'space-between', marginBottom: 12 }}>
           <h2 style={{ margin: 0 }}>Event schedule</h2>

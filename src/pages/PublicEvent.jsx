@@ -6,6 +6,7 @@ import { fmtRange, fmtDay, eventDays } from '../lib/util.js';
 import { EVENT_KINDS, ROLES, PARKS, parseOrkId, ORK_PLAYER_URL } from '../lib/constants.js';
 import Schedule from '../components/Schedule.jsx';
 import FeastPicker, { emptyFeast } from '../components/FeastPicker.jsx';
+import { DIV, fmRequestSignup } from '../lib/fieldMarshal.js';
 
 export default function PublicEvent() {
   const { id } = useParams();
@@ -69,6 +70,8 @@ function RegisterForm({ id, e }) {
   const days = eventDays(e);
   const [f, setF] = useState({ orkRaw: '', persona: '', email: '', park: '', kingdom: '', days, notes: '', eating: e.feast?.enabled ? 'yes' : 'no' });
   const [feast, setFeast] = useState(emptyFeast());
+  const [tDivs, setTDivs] = useState([]);
+  const wm = e.warmaster?.fmTid && e.warmaster.signupsOpen ? e.warmaster : null;
   const [ork, setOrk] = useState(null);      // { state, msg, feastFromOrk }
   const [done, setDone] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -100,9 +103,16 @@ function RegisterForm({ id, e }) {
         persona: f.persona.trim().slice(0, 120), email: f.email.trim().slice(0, 200), park: f.park.trim().slice(0, 120),
         kingdom: f.kingdom.trim().slice(0, 120), orkId: ork?.oid || parseOrkId(f.orkRaw) || '', days: f.days, notes: f.notes.slice(0, 1000),
       };
+      const fight = wm ? tDivs.filter(k => wm.divs.includes(k)) : [];
+      let fmRequestId = '';
+      if (fight.length) {
+        try { fmRequestId = await fmRequestSignup({ tid: wm.fmTid, name: reg.persona, park: reg.park, orkId: reg.orkId, divs: fight }); }
+        catch (err) { console.error('Field Marshal request failed', err); }
+      }
+      reg.tourneyDivs = fight; reg.fmRequestId = fmRequestId;
       const fp = eating ? { ...feast, notes: feast.notes.slice(0, 500), source: ork?.feastFromOrk ? 'ork' : 'form', orkId: reg.orkId } : null;
       await register(id, reg, fp);
-      setDone({ persona: reg.persona, eating });
+      setDone({ persona: reg.persona, eating, fight: fight.length ? (fmRequestId ? 'sent' : 'failed') : null, wmName: wm?.name });
     } catch (err) { console.error(err); toast('Couldn’t save your registration. Try again.'); }
     setBusy(false);
   }
@@ -110,7 +120,9 @@ function RegisterForm({ id, e }) {
   if (done) return (
     <div className="panel" id="register"><h2>Huzzah, {done.persona}!</h2>
       <p>You’re registered for <b>{e.name}</b>{done.eating ? ' and on the feast list' : ''}. Show your persona name at the gate.</p>
-      <button className="btn ghost" onClick={() => { setDone(null); setOrk(null); setFeast(emptyFeast()); set({ orkRaw: '', persona: '', email: '', notes: '' }); }}>Register someone else</button></div>);
+      {done.fight === 'sent' && <p>Your <b>{done.wmName}</b> signup is in. A marshal will confirm you on the lists.</p>}
+      {done.fight === 'failed' && <div className="note bad">You’re registered for the event, but your tournament signup didn’t go through. Let the Warcrat know which divisions you want.</div>}
+      <button className="btn ghost" onClick={() => { setDone(null); setOrk(null); setFeast(emptyFeast()); setTDivs([]); set({ orkRaw: '', persona: '', email: '', notes: '' }); }}>Register someone else</button></div>);
 
   return (
     <form className="panel form" id="register" onSubmit={submit}>
@@ -145,6 +157,13 @@ function RegisterForm({ id, e }) {
           <FeastPicker value={feast} onChange={setFeast} />
           <p className="hint">Only the Autocrat and Feastcrat see your feast preferences. Tip: in the ORK, turn on <b>Show My Feast Preferences</b> in your profile settings and FORK will fill this in for you next time.</p>
         </>}
+      </div>}
+
+      {wm && <div className="form" style={{ borderTop: '1px solid var(--line)', paddingTop: 14 }}>
+        <div><div className="lbl" style={{ marginBottom: 2 }}>{wm.name}</div>
+          <p className="hint" style={{ margin: '0 0 8px' }}>Want to fight? Pick your divisions. Leave them all unchecked if you’re not entering.</p>
+          <div className="checks">{wm.divs.map(k => { const on = tDivs.includes(k); return (
+            <label key={k} className={on ? 'on' : ''}><input type="checkbox" checked={on} onChange={() => setTDivs(on ? tDivs.filter(x => x !== k) : [...tDivs, k])} />{DIV[k]?.n || k}</label>); })}</div></div>
       </div>}
 
       <div className="field"><label htmlFor="nt">Notes for the crats (optional)</label><textarea id="nt" rows={2} maxLength={1000} value={f.notes} onChange={x => set({ notes: x.target.value })} /></div>
