@@ -1,0 +1,113 @@
+rules_version = '2';
+// FORK security rules.
+//   events/{eid}                     public once published; Autocrat edits; Feastcrat edits `feast`; each crat edits their own `notes.<role>`
+//   access/{eid}                     private crat roster: roles by email, contacts, owner
+//   events/{eid}/schedule/{sid}      public once published; each track editable only by its crats
+//   events/{eid}/registrations/{rid} anyone can create while registration is open; crats read; Trollcrat checks in
+//   events/{eid}/feastPrefs/{rid}    dietary + allergen data: readable ONLY by Autocrat and Feastcrat
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function verified() { return signedIn() && request.auth.token.email != null && request.auth.token.email_verified == true; }
+    function me() { return request.auth.token.email.lower(); }
+    function accPath(eid) { return /databases/$(database)/documents/access/$(eid); }
+    function evPath(eid) { return /databases/$(database)/documents/events/$(eid); }
+    function acc(eid) { return get(accPath(eid)).data; }
+    function myRoles(eid) { return verified() && exists(accPath(eid)) ? acc(eid).roles.get(me(), []) : []; }
+    function isOwner(eid) { return signedIn() && exists(accPath(eid)) && acc(eid).ownerUid == request.auth.uid; }
+    function isAuto(eid) { return isOwner(eid) || myRoles(eid).hasAny(['auto']); }
+    function isStaff(eid) { return isOwner(eid) || myRoles(eid).size() > 0; }
+    function hasRole(eid, r) { return isAuto(eid) || myRoles(eid).hasAny([r]); }
+    function ev(eid) { return get(evPath(eid)).data; }
+    function published(eid) { return ev(eid).get('published', false) == true; }
+    function regOpen(eid) { return ev(eid).get('registrationOpen', false) == true && (published(eid) || isStaff(eid)); }
+
+    function trackRoles() {
+      return { 'court': ['troll'], 'war': ['war', 'quest'], 'warmaster': ['war'],
+               'as': ['as'], 'classes': ['as'], 'meals': ['feast'] };
+    }
+    function canTrack(eid, t) { return t in trackRoles() && (isAuto(eid) || myRoles(eid).hasAny(trackRoles()[t])); }
+    function str(v, max) { return v is string && v.size() <= max; }
+
+    /* ---------- private crat roster ---------- */
+    match /access/{eid} {
+      allow read: if signedIn() && (resource.data.ownerUid == request.auth.uid
+                    || (verified() && me() in resource.data.staffEmails));
+      allow create: if verified()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.roles.keys().hasOnly([me()])
+        && request.resource.data.roles[me()] == ['auto']
+        && request.resource.data.staffEmails == [me()]
+        && existsAfter(evPath(eid)) && getAfter(evPath(eid)).data.ownerUid == request.auth.uid;
+      allow update: if (resource.data.ownerUid == request.auth.uid
+                        || (verified() && resource.data.roles.get(me(), []).hasAny(['auto'])))
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.staffEmails is list && request.resource.data.staffEmails.size() <= 20;
+      allow delete: if resource.data.ownerUid == request.auth.uid;
+    }
+
+    /* ---------- events ---------- */
+    match /events/{eid} {
+      // Single reads: published events, or drafts for their crats. Lists (the home page) only ever see published events.
+      allow get: if resource.data.get('published', false) == true || isStaff(eid);
+      allow list: if resource.data.published == true;
+      allow create: if verified()
+        && request.resource.data.ownerUid == request.auth.uid
+        && existsAfter(accPath(eid));
+      allow update: if request.resource.data.ownerUid == resource.data.ownerUid && (
+        isAuto(eid)
+        || (hasRole(eid, 'feast') && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['feast']))
+        || (isStaff(eid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['notes'])
+            && request.resource.data.notes.diff(resource.data.get('notes', {})).affectedKeys().hasOnly(myRoles(eid)))
+      );
+      allow delete: if isOwner(eid);
+
+      match /schedule/{sid} {
+        allow read: if published(eid) || isStaff(eid);
+        allow create: if canTrack(eid, request.resource.data.track)
+          && str(request.resource.data.title, 140) && request.resource.data.title.size() > 0;
+        allow update: if canTrack(eid, resource.data.track) && canTrack(eid, request.resource.data.track)
+          && str(request.resource.data.title, 140);
+        allow delete: if canTrack(eid, resource.data.track);
+      }
+
+      match /registrations/{rid} {
+        allow read: if isStaff(eid);
+        allow create: if regOpen(eid)
+          && request.resource.data.keys().hasOnly(['persona', 'email', 'park', 'kingdom', 'orkId', 'days', 'notes', 'feast', 'checkedIn', 'createdAt'])
+          && str(request.resource.data.persona, 120) && request.resource.data.persona.size() > 0
+          && str(request.resource.data.email, 200) && str(request.resource.data.park, 120)
+          && str(request.resource.data.kingdom, 120) && str(request.resource.data.orkId, 12)
+          && str(request.resource.data.notes, 1000)
+          && request.resource.data.days is list && request.resource.data.days.size() <= 14
+          && request.resource.data.checkedIn == false
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.feast is bool
+          && (request.resource.data.feast == false
+              || existsAfter(/databases/$(database)/documents/events/$(eid)/feastPrefs/$(rid)));
+        allow update: if isAuto(eid)
+          || (hasRole(eid, 'troll') && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['checkedIn']));
+        allow delete: if isAuto(eid);
+      }
+
+      match /feastPrefs/{rid} {
+        allow read: if hasRole(eid, 'feast');
+        allow create: if regOpen(eid)
+          && existsAfter(/databases/$(database)/documents/events/$(eid)/registrations/$(rid))
+          && getAfter(/databases/$(database)/documents/events/$(eid)/registrations/$(rid)).data.feast == true
+          && request.resource.data.keys().hasOnly(['persona', 'noRestrictions', 'diets', 'restrictions', 'allergens', 'notes', 'source', 'orkId', 'createdAt'])
+          && str(request.resource.data.persona, 120) && str(request.resource.data.notes, 500)
+          && request.resource.data.diets is list && request.resource.data.diets.size() <= 6
+          && request.resource.data.restrictions is list && request.resource.data.restrictions.size() <= 8
+          && request.resource.data.allergens is map
+          && request.resource.data.allergens.keys().hasOnly(['Milk', 'Eggs', 'Fish', 'Shellfish', 'Treenuts', 'Peanuts', 'Wheat', 'Soy',
+               'Sesame', 'Garlic', 'Gluten', 'Onion', 'Mushroom', 'Corn', 'Coconut', 'Cocoa', 'Nightshades'])
+          && request.resource.data.source in ['ork', 'form']
+          && request.resource.data.createdAt == request.time;
+        allow update: if hasRole(eid, 'feast');
+        allow delete: if hasRole(eid, 'feast');
+      }
+    }
+  }
+}
