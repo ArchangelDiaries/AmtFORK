@@ -3,10 +3,15 @@
   publish = "dist"
   functions = "netlify/functions"
 
+# Firebase web config (VITE_FB_* for FORK, VITE_FM_* for Field Marshal) is public by design: it identifies the project,
+# it doesn't grant access. Security comes from firestore.rules. Tell Netlify's
+# secrets scanner these values are expected in the built JavaScript.
 [build.environment]
-  SECRETS_SCAN_OMIT_KEYS = "VITE_FB_API_KEY,VITE_FB_AUTH_DOMAIN,VITE_FB_PROJECT_ID,VITE_FB_APP_ID"
+  SECRETS_SCAN_OMIT_KEYS = "VITE_FB_API_KEY,VITE_FB_AUTH_DOMAIN,VITE_FB_PROJECT_ID,VITE_FB_APP_ID,VITE_FM_API_KEY,VITE_FM_AUTH_DOMAIN,VITE_FM_PROJECT_ID,VITE_FM_APP_ID,VITE_FM_URL"
+  # Smart detection flags any Google key starting "AIza". Firebase web keys always start that way and
+  # are meant to be public, so smart detection is off. The named-variable scan above still runs.
   SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
-  
+
 [[redirects]]
   from = "/api/ork"
   to = "/.netlify/functions/ork"

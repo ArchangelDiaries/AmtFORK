@@ -151,3 +151,4 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 .tl-block.on{outline:2px solid var(--c);outline-offset:1px}
 .tl-tba{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px}
 .tl-detail{margin-top:10px}
+.field .checks label{font-size:1rem;font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink)}

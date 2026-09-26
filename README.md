@@ -61,6 +61,10 @@ The Warcrat (or Autocrat) can create the event's Warmaster Tournament in Field M
 - **Fighter signups:** FORK sends each fighter's divisions to Field Marshal as a `requests/{id}` entry `{ tid, name, park, orkId, divs, at }`. Marshals approve them on Field Marshal's Signups tab, the same as signups made in Field Marshal directly. FORK also keeps the divisions on the event registration and flags anyone whose request didn't go through.
 - **Opening and closing:** the Warcrat can open or close tournament signups from FORK. This changes `signupsOpen` in Field Marshal too.
 
+- **Linked both ways:** FORK writes `fork: { eventId, name, url }` onto the Field Marshal tournament, and Field Marshal shows "Part of <event>" with a link back. FORK opens the tournament directly with `?t=<tournament id>&tab=signups` (or `tab=brackets` from the public page).
+- **Live check:** the Warmaster panel and the public signup form read the tournament from Field Marshal each time. If it was deleted there, the panel offers to link a different tournament or create a new one. Divisions only appear on the signup form while Field Marshal says signups are open.
+- **Link an existing tournament:** paste the tournament's Field Marshal address (it ends in `?t=…`) to link a tournament that was made in Field Marshal first.
+
 ### Connecting Field Marshal (one time)
 1. From Field Marshal's `config.js` (`window.FIELD_MARSHAL_FIREBASE`), copy the values into these Netlify environment variables on the FORK site: `VITE_FM_API_KEY`, `VITE_FM_AUTH_DOMAIN`, `VITE_FM_PROJECT_ID` (`srfieldmarshal`), `VITE_FM_APP_ID`. Put Field Marshal's site address in `VITE_FM_URL`.
 2. In the **srfieldmarshal** Firebase console, go to **Authentication → Settings → Authorized domains** and add FORK's Netlify domain. Without this, the Field Marshal sign-in popup fails inside FORK.

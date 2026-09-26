@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Header, useApp } from '../App.jsx';
 import { useDoc, useQuery, col, register, orkLookup } from '../lib/data.js';
@@ -6,7 +6,7 @@ import { fmtRange, fmtDay, eventDays } from '../lib/util.js';
 import { eventType, eventHost, ROLES, PARKS, parseOrkId, ORK_PLAYER_URL } from '../lib/constants.js';
 import Schedule from '../components/Schedule.jsx';
 import FeastPicker, { emptyFeast } from '../components/FeastPicker.jsx';
-import { DIV, fmRequestSignup } from '../lib/fieldMarshal.js';
+import { DIV, fmRequestSignup, fmGetTournament, fmTournamentUrl, fmConfigured } from '../lib/fieldMarshal.js';
 
 export default function PublicEvent() {
   const { id } = useParams();
@@ -37,7 +37,8 @@ export default function PublicEvent() {
           <div className="row" style={{ marginTop: 16 }}>
             {e.registrationOpen ? <a className="btn accent" href="#register">Register</a> : <span className="pill">Registration closed</span>}
             <a className="btn ghost" href="#schedule">Schedule</a>
-            {e.fieldMarshalUrl && <a className="btn ghost" href={e.fieldMarshalUrl} target="_blank" rel="noopener">Warmaster brackets</a>}
+            {(e.warmaster?.fmTid && fmTournamentUrl(e.warmaster.fmTid) ? fmTournamentUrl(e.warmaster.fmTid, 'brackets') : e.fieldMarshalUrl) &&
+              <a className="btn ghost" href={e.warmaster?.fmTid && fmTournamentUrl(e.warmaster.fmTid) ? fmTournamentUrl(e.warmaster.fmTid, 'brackets') : e.fieldMarshalUrl} target="_blank" rel="noopener">Warmaster brackets</a>}
           </div>
         </section>
 
@@ -71,7 +72,15 @@ function RegisterForm({ id, e }) {
   const [f, setF] = useState({ orkRaw: '', persona: '', email: '', park: '', kingdom: '', days, notes: '', eating: e.feast?.enabled ? 'yes' : 'no' });
   const [feast, setFeast] = useState(emptyFeast());
   const [tDivs, setTDivs] = useState([]);
-  const wm = e.warmaster?.fmTid && e.warmaster.signupsOpen ? e.warmaster : null;
+  // Only offer tournament divisions when Field Marshal confirms the tournament exists and signups are open there.
+  const [fmT, setFmT] = useState(null);
+  useEffect(() => {
+    const tid = e.warmaster?.fmTid; if (!tid || !fmConfigured) { setFmT(null); return; }
+    let live = true; fmGetTournament(tid).then(t => live && setFmT(t)).catch(() => live && setFmT(null));
+    return () => { live = false; };
+  }, [e.warmaster?.fmTid]);
+  const wm = e.warmaster?.fmTid && fmT && fmT.signupsOpen !== false && fmT.status !== 'final'
+    ? { ...e.warmaster, name: fmT.name || e.warmaster.name, divs: (fmT.divs && fmT.divs.length) ? fmT.divs : e.warmaster.divs } : null;
   const [ork, setOrk] = useState(null);      // { state, msg, feastFromOrk }
   const [done, setDone] = useState(null);
   const [busy, setBusy] = useState(false);

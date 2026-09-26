@@ -1,6 +1,6 @@
 rules_version = '2';
 // FORK security rules.
-//   events/{eid}                     public once published; Autocrat edits; Feastcrat edits `feast`; each crat edits their own `notes.<role>`
+//   events/{eid}                     public once published; Autocrat edits; Feastcrat edits `feast`; Warcrat edits `warmaster`; each crat edits their own `notes.<role>`
 //   access/{eid}                     private crat roster: roles by email, contacts, owner
 //   events/{eid}/schedule/{sid}      public once published; each track editable only by its crats
 //   events/{eid}/registrations/{rid} anyone can create while registration is open; crats read; Trollcrat checks in
@@ -58,6 +58,7 @@ service cloud.firestore {
       allow update: if request.resource.data.ownerUid == resource.data.ownerUid && (
         isAuto(eid)
         || (hasRole(eid, 'feast') && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['feast']))
+        || (hasRole(eid, 'war') && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['warmaster']))
         || (isStaff(eid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['notes'])
             && request.resource.data.notes.diff(resource.data.get('notes', {})).affectedKeys().hasOnly(myRoles(eid)))
       );
@@ -75,12 +76,14 @@ service cloud.firestore {
       match /registrations/{rid} {
         allow read: if isStaff(eid);
         allow create: if regOpen(eid)
-          && request.resource.data.keys().hasOnly(['persona', 'email', 'park', 'kingdom', 'orkId', 'days', 'notes', 'feast', 'checkedIn', 'createdAt'])
+          && request.resource.data.keys().hasOnly(['persona', 'email', 'park', 'kingdom', 'orkId', 'days', 'notes', 'feast', 'checkedIn', 'createdAt', 'tourneyDivs', 'fmRequestId'])
           && str(request.resource.data.persona, 120) && request.resource.data.persona.size() > 0
           && str(request.resource.data.email, 200) && str(request.resource.data.park, 120)
           && str(request.resource.data.kingdom, 120) && str(request.resource.data.orkId, 12)
           && str(request.resource.data.notes, 1000)
           && request.resource.data.days is list && request.resource.data.days.size() <= 14
+          && request.resource.data.get('tourneyDivs', []) is list && request.resource.data.get('tourneyDivs', []).size() <= 5
+          && str(request.resource.data.get('fmRequestId', ''), 40)
           && request.resource.data.checkedIn == false
           && request.resource.data.createdAt == request.time
           && request.resource.data.feast is bool

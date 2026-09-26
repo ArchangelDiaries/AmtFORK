@@ -8,6 +8,7 @@ const m = f => fileURLToPath(new URL(`./tests/mock/${f}`, import.meta.url));
 
 export default defineConfig({
   plugins: [react()],
+  define: { __FORK_BUILD__: JSON.stringify(new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC') },
   resolve: {
     alias: mock ? [
       { find: /^firebase\/firestore$/, replacement: m('firestore.js') },

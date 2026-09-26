@@ -28,6 +28,8 @@ export const DIVS = [
   { k: 'open', n: 'Open Class' },
 ];
 export const DIV = Object.fromEntries(DIVS.map(d => [d.k, d]));
+// Field Marshal tournament formats ('pit' is Field Marshal's default when none is set).
+export const FORMATS = [{ k: 'pit', n: 'Pool and Bracket', d: 'Timed pits, then a top-4 bracket' }, { k: 'elim', n: 'Bracket Tournament', d: 'Single elimination' }];
 export const LEVELS = [
   { k: 'shire', n: 'Shire' }, { k: 'barony', n: 'Barony' }, { k: 'duchy', n: 'Duchy' },
   { k: 'kingdom', n: 'Kingdom' }, { k: 'major', n: 'Major kingdom (Weaponmaster, Warmaster, Olympiad)' },
@@ -50,11 +52,25 @@ export async function fmSignInAsMarshal() {
   return email;
 }
 
-export async function fmCreateTournament({ name, date, park, level, pitMin, divs }) {
-  const data = { name, date, park, level, pitMin: Math.max(1, Number(pitMin) || 10), divs, signupsOpen: true, at: Date.now() };
+/** Link a FORK event back from Field Marshal: shown there as "Part of <event>". */
+export const forkRef = (eventId, name) => ({ eventId, name: String(name || '').slice(0, 120), url: `${location.origin}/e/${eventId}` });
+
+/** Field Marshal address that opens this tournament (optionally on a tab, e.g. 'signups'). */
+export const fmTournamentUrl = (tid, tab) => FM_URL ? `${FM_URL.replace(/\/+$/, '')}/?t=${encodeURIComponent(tid)}${tab ? `&tab=${tab}` : ''}` : '';
+
+/** Accepts a Field Marshal link (…/?t=ID) or a bare tournament ID. */
+export function parseFmTid(s) {
+  s = String(s || '').trim();
+  try { const t = new URL(s).searchParams.get('t'); if (t) return t; } catch (e) { /* not a URL */ }
+  return /^[A-Za-z0-9_-]{6,40}$/.test(s) ? s : '';
+}
+
+export async function fmCreateTournament({ name, date, park, level, pitMin, divs, format, fork }) {
+  const data = { name, date, park, level, format: format === 'elim' ? 'elim' : 'pit', pitMin: Math.max(1, Number(pitMin) || 10), divs, signupsOpen: true, at: Date.now(), ...(fork ? { fork } : {}) };
   const ref = await addDoc(collection(fmDb(), 'tournaments'), data);
   return ref.id;
 }
+export const fmSetFork = (tid, fork) => updateDoc(doc(fmDb(), 'tournaments', tid), { fork });
 export const fmSetSignupsOpen = (tid, open) => updateDoc(doc(fmDb(), 'tournaments', tid), { signupsOpen: !!open });
 
 /** Public: read the tournament (to confirm it still exists and signups are open). */
@@ -66,7 +82,7 @@ export async function fmGetTournament(tid) {
 /** Public: a player's signup request, approved later by a marshal in Field Marshal. */
 export async function fmRequestSignup({ tid, name, park, orkId, divs }) {
   const ref = await addDoc(collection(fmDb(), 'requests'), {
-    tid, name: String(name).slice(0, 120), park: String(park || '').slice(0, 120), orkId: String(orkId || ''), divs, at: Date.now(),
+    tid, name: String(name).slice(0, 80), park: String(park || '').slice(0, 60), orkId: String(orkId || '').slice(0, 12), divs, at: Date.now(),
   });
   return ref.id;
 }

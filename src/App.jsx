@@ -70,6 +70,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {msg && <div id="toast" role="status">{msg}</div>}
+      <p className="foot" style={{ marginTop: 0, paddingBottom: 16 }}>FORK build {typeof __FORK_BUILD__ !== 'undefined' ? __FORK_BUILD__ : 'dev'}</p>
     </Ctx.Provider>
   );
 }
