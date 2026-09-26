@@ -5,6 +5,11 @@ rules_version = '2';
 //   events/{eid}/schedule/{sid}      public once published; each track editable only by its crats
 //   events/{eid}/registrations/{rid} anyone can create while registration is open; crats read; Trollcrat checks in
 //   events/{eid}/feastPrefs/{rid}    dietary + allergen data: readable ONLY by Autocrat and Feastcrat
+//   bidCalls/{id}                    calls for bids: public; kingdom officers write
+//   bids/{id}                        bids: public once submitted; drafts private to their owner; owner edits; officers edit
+//   bidDecisions/{bidId}             kingdom outcome for each bid: public; officers write
+//   bidReviews/{bidId}               monarch's private rating + notes: officers only
+//   kingdomOfficers/{email}          who is a kingdom officer; add in the console; each person reads only their own
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -111,6 +116,37 @@ service cloud.firestore {
         allow update: if hasRole(eid, 'feast');
         allow delete: if hasRole(eid, 'feast');
       }
+    }
+
+    /* ---------- event bids ---------- */
+    function officer() { return verified() && exists(/databases/$(database)/documents/kingdomOfficers/$(me())); }
+    function bidStatusOk(s) { return s in ['draft', 'submitted', 'withdrawn']; }
+
+    match /kingdomOfficers/{email} {
+      allow read: if verified() && me() == email;
+      allow write: if false;
+    }
+    match /bidCalls/{id} {
+      allow read: if true;
+      allow write: if officer();
+    }
+    match /bids/{id} {
+      allow read: if resource.data.status in ['submitted', 'withdrawn']
+        || (signedIn() && resource.data.owner == request.auth.uid) || officer();
+      allow create: if signedIn() && request.resource.data.owner == request.auth.uid
+        && bidStatusOk(request.resource.data.status) && request.resource.data.status != 'withdrawn'
+        && str(request.resource.data.eventName, 140) && !('eventId' in request.resource.data);
+      allow update: if officer() || (signedIn()
+        && resource.data.owner == request.auth.uid && request.resource.data.owner == request.auth.uid
+        && bidStatusOk(request.resource.data.status) && str(request.resource.data.eventName, 140));
+      allow delete: if officer() || (signedIn() && resource.data.owner == request.auth.uid && resource.data.status == 'draft');
+    }
+    match /bidDecisions/{id} {
+      allow read: if true;
+      allow write: if officer() && request.resource.data.status in ['submitted', 'accepted', 'declined'];
+    }
+    match /bidReviews/{id} {
+      allow read, write: if officer();
     }
   }
 }

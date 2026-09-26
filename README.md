@@ -5,7 +5,31 @@ FORK is an event management app for Park events and EndReign events in the Princ
 - **Public side** (`/`, `/e/:id`): park members browse events and see the theme, crats, schedule and feast menu. They register without making an account, and can fill in the form from their ORK profile.
 - **Crat Hall** (`/crat`): the Autocrat creates an event, sets the theme, assigns and invites crats, and publishes the event. Each crat edits their own part of the schedule. The Gatecrat checks people in at the gate. The Feastcrat gets the dietary and allergy report.
 
+- **Event bids** (`/bids`): the kingdom posts calls for bids (Midreign, Coronation, Special Event), and players, parks, households, companies and guilds bid to host. Kingdom-level events the kingdom doesn't run itself, like Feast of the Gods, need no posted call. Kingdom officers compare bids on the **Monarch's Desk** and award one. The winner then creates the event in FORK from the bid with one click, and it arrives with its dates, site, theme, feast, crat names and battlegame schedule filled in. Every bid stays searchable in the **Bid Archive**.
+
 Built with Vite + React, Firebase (Auth + Firestore) and Netlify (hosting + one function for ORK lookups).
+
+## The event life cycle
+
+| Stage | Where | Who |
+|---|---|---|
+| Call for bids | `/bids` | Kingdom officers post the events the kingdom needs hosted |
+| Bid | `/bids/new` | Any signed-in player or group. Drafts stay private until submitted |
+| Review and award | `/bids/desk` (Monarch's Desk) | Kingdom officers: side-by-side comparison, charts, private ratings, Award |
+| Hand-off | the winning bid's page | The bid's owner (or an officer) clicks **Create the event in FORK** and becomes its Autocrat |
+| Plan and run | `/crat/:id` (Crat Hall) | Crats: theme, schedule, registration, gate, feast, Warmaster Tournament in Field Marshal |
+| Archive | `/bids/archive` | Everyone: past bids, outcomes, and which ones became events |
+
+### What the hand-off carries over
+- Name, dates, site and address, kingdom-level event type (Midreign, Coronation, or Other event for Special Events).
+- Theme title and pitch.
+- Feast on or off, price, seat count, menu, and a potluck note.
+- Crat names by role. They show on the event's Crats tab as "Named in the winning bid", ready for the Autocrat to add each email and send invites.
+- Schedule items: each themed battlegame (Wargames track, with its day and times), the tournament (Warmaster Tournament track), the A&S choice (Arts & Sciences track), and the feast (Meals & Feast track). Items without a time show as to be scheduled.
+- The event starts as a draft with registration closed, and links back to its bid.
+
+### Kingdom officers
+Officers are whoever has a document in the `kingdomOfficers` collection. In the Firebase console, open **Firestore Database > Data > Start collection**, name it `kingdomOfficers`, and add one document per officer whose **Document ID is their email in lowercase** (add any field, such as `role` = `Monarch`). They sign out and back in to see the Monarch's Desk. Update the list at each reign change.
 
 ## What each crat can do
 
@@ -72,6 +96,17 @@ The Warcrat (or Autocrat) can create the event's Warmaster Tournament in Field M
 4. Re-deploy FORK's `firestore.rules`. The update lets the Warcrat edit the event's `warmaster` field and lets registrations store tournament divisions.
 
 No changes to Field Marshal are needed. FORK uses its existing tournament and signup-request formats.
+
+## ORK access key (required from Netlify)
+The ORK sits behind Cloudflare, which blocks requests from cloud platforms like Netlify unless each request names the app and carries a private key. Ask the ORK administrators for a key for FORK, then add these in Netlify under **Site configuration > Environment variables**, and redeploy:
+
+| Variable | Example | Notes |
+|---|---|---|
+| `ORK_KEY` | the 64-character key | Secret. Tick **Contains secret values** and scope it to **Functions** |
+| `ORK_CLIENT` | `FORK/1.1` | Public app name and version. Never the key, and it can't start with "Amtgard" |
+| `ORK_USER_AGENT` | `FORK/1.1 (+https://your-fork-site.netlify.app; you@example.com)` | Site address and a contact the ORK admins can reach |
+
+`netlify/functions/ork.js` adds them as `X-Ork-Key`, `X-ORK-Client` and `User-Agent`. The key never reaches the browser. If ORK lookups fail, check **Logs > Functions** in Netlify for "ORK returned 403". Raise the version in `ORK_CLIENT` and `ORK_USER_AGENT` when you release. To rotate the key, the admins add the new one alongside the old, you replace `ORK_KEY` and redeploy, then they retire the old one.
 
 ## Local development
 ```
