@@ -38,7 +38,7 @@ export const col = (...p) => collection(db, ...p);
 
 /* ---------- events ---------- */
 export const blankEvent = () => ({
-  name: '', kind: 'park', park: 'Siar Geata', startDate: '', endDate: '', location: '', address: '',
+  name: '', kind: 'park', scope: 'park', kingdom: 'Westmarch', park: 'Siar Geata', startDate: '', endDate: '', location: '', address: '',
   theme: { title: '', tagline: '', story: '', accent: '#B07F0C' },
   feast: { enabled: false, price: '', capacity: '', menu: '', notes: '' },
   registrationOpen: true, published: false, fieldMarshalUrl: '', crats: {}, notes: {},
