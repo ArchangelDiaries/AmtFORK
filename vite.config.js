@@ -14,6 +14,7 @@ export default defineConfig({
       { find: /^firebase\/auth$/, replacement: m('auth.js') },
       { find: /.*\/lib\/firebase\.js$/, replacement: m('firebase.js') },
       { find: /.*\/lib\/data\.js$/, replacement: m('data.js') },
+      { find: /.*\/lib\/fieldMarshal\.js$/, replacement: m('fieldMarshal.js') },
     ] : [],
   },
   build: {

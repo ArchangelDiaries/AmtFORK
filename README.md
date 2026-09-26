@@ -3,7 +3,7 @@
 FORK is an event management app for Park events and EndReign events in the Principality of Stone Rivers.
 
 - **Public side** (`/`, `/e/:id`): park members browse events and see the theme, crats, schedule and feast menu. They register without making an account, and can fill in the form from their ORK profile.
-- **Crat Hall** (`/crat`): the Autocrat creates an event, sets the theme, assigns and invites crats, and publishes the event. Each crat edits their own part of the schedule. The Trollcrat checks people in at the gate. The Feastcrat gets the dietary and allergy report.
+- **Crat Hall** (`/crat`): the Autocrat creates an event, sets the theme, assigns and invites crats, and publishes the event. Each crat edits their own part of the schedule. The Gatecrat checks people in at the gate. The Feastcrat gets the dietary and allergy report.
 
 Built with Vite + React, Firebase (Auth + Firestore) and Netlify (hosting + one function for ORK lookups).
 
@@ -16,8 +16,8 @@ Built with Vite + React, Firebase (Auth + Firestore) and Netlify (hosting + one 
 | A&S Crat | Arts & Sciences, Workshops & Classes | |
 | Questcrat | Wargames | |
 | Feastcrat | Meals & Feast | Feast settings and the full dietary/allergy report |
-| Trollcrat | Court & General | Gate check-in |
-| Watercrat, Safetycrat | View only | Their own role notes |
+| Gatecrat | Court & General | Gate check-in |
+| Hydrocrat, Securitycrat | View only | Their own role notes |
 
 All crats can see registrations. **Feast preferences and allergies are visible only to the Autocrat and Feastcrat.** The security rules enforce this, not just the screens.
 
@@ -52,6 +52,22 @@ In 2026 the ORK added **Dietary Preferences** to player profiles: diet, a "won't
 
 ### 3. First event
 Sign in at `/signin`, open the Crat Hall and click **New event**. You become its Autocrat. On the **Crats** tab, add each crat's persona and email and click **Save & email invite**. Firebase emails them a sign-in link. When they sign in with that address, the event appears in their Crat Hall. If an email doesn't arrive, use **Copy invite message**.
+
+## Warmaster Tournament in Field Marshal
+
+The Warcrat (or Autocrat) can create the event's Warmaster Tournament in Field Marshal from FORK's **Schedule** tab. Players then choose their divisions on the FORK registration form.
+
+- **Creating the tournament:** the Warcrat signs in to Field Marshal with Google, and FORK checks that they're a marshal there (`marshals/{email}`). Then FORK writes a normal Field Marshal tournament `{ name, date, park, level, pitMin, divs, signupsOpen: true, at }` and can add it to the event schedule.
+- **Fighter signups:** FORK sends each fighter's divisions to Field Marshal as a `requests/{id}` entry `{ tid, name, park, orkId, divs, at }`. Marshals approve them on Field Marshal's Signups tab, the same as signups made in Field Marshal directly. FORK also keeps the divisions on the event registration and flags anyone whose request didn't go through.
+- **Opening and closing:** the Warcrat can open or close tournament signups from FORK. This changes `signupsOpen` in Field Marshal too.
+
+### Connecting Field Marshal (one time)
+1. From Field Marshal's `config.js` (`window.FIELD_MARSHAL_FIREBASE`), copy the values into these Netlify environment variables on the FORK site: `VITE_FM_API_KEY`, `VITE_FM_AUTH_DOMAIN`, `VITE_FM_PROJECT_ID` (`srfieldmarshal`), `VITE_FM_APP_ID`. Put Field Marshal's site address in `VITE_FM_URL`.
+2. In the **srfieldmarshal** Firebase console, go to **Authentication → Settings → Authorized domains** and add FORK's Netlify domain. Without this, the Field Marshal sign-in popup fails inside FORK.
+3. Redeploy FORK. `netlify.toml` already tells the secrets scanner that these values are expected.
+4. Re-deploy FORK's `firestore.rules`. The update lets the Warcrat edit the event's `warmaster` field and lets registrations store tournament divisions.
+
+No changes to Field Marshal are needed. FORK uses its existing tournament and signup-request formats.
 
 ## Local development
 ```

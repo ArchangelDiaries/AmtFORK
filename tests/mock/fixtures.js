@@ -1,7 +1,7 @@
 // Fictional sample data for UI previews only.
 const E = 'events/ev1';
 export const FIX = {
-  [E]: { name: 'Fall EndReign', kind: 'endreign', park: 'Siar Geata', startDate: '2026-10-17', endDate: '2026-10-18', location: 'Oak Hollow Park', address: 'Pavilion 3',
+  [E]: { name: 'Fall EndReign', kind: 'endreign', scope: 'kingdom', kingdom: 'Westmarch', park: 'Siar Geata', startDate: '2026-10-17', endDate: '2026-10-18', location: 'Oak Hollow Park', address: 'Pavilion 3',
     theme: { title: 'The Fall of the Ashen Crown', tagline: 'The old reign ends at dusk. Who will stand when the banners fall?', story: 'The Ashen Crown has worn thin.\nGarb in greys and golds; bring a token for the final court.', accent: '#9A5B2E' },
     feast: { enabled: true, price: '$12, kids free', capacity: '60', menu: 'Roast chicken, root vegetables, bread and honey butter, apple crumble.', notes: 'Bring your own feast gear.' },
     warmaster: { fmTid: 'fm1', name: 'Fall EndReign Warmaster Tournament', date: '2026-10-17', level: 'duchy', pitMin: 10, divs: ['single','board','flo','heavy','open'], signupsOpen: true, createdBy: 'brannoc@example.com' },
