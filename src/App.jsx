@@ -8,6 +8,14 @@ import PublicEvent from './pages/PublicEvent.jsx';
 import SignIn from './pages/SignIn.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import EventAdmin from './pages/EventAdmin.jsx';
+import { BidsLayout } from './pages/bids/common.jsx';
+import Calls from './pages/bids/Calls.jsx';
+import CallPage from './pages/bids/CallPage.jsx';
+import Builder from './pages/bids/Builder.jsx';
+import BidSheet from './pages/bids/BidSheet.jsx';
+import MyBids from './pages/bids/MyBids.jsx';
+import Archive from './pages/bids/Archive.jsx';
+import Desk from './pages/bids/Desk.jsx';
 
 const Ctx = createContext(null);
 export const useApp = () => useContext(Ctx);
@@ -35,6 +43,7 @@ export function Header({ children }) {
       </Link>
       <nav className="nav">
         {children}
+        <Link className="btn ghost sm" to="/bids">Event bids</Link>
         {user ? <>
           <Link className="btn ghost sm" to="/crat">Crat Hall</Link>
           <button className="btn ghost sm" onClick={() => signOut(auth)}>Sign out</button>
@@ -67,6 +76,16 @@ export default function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/crat" element={<RequireAuth><Dashboard /></RequireAuth>} />
         <Route path="/crat/:id" element={<RequireAuth><EventAdmin /></RequireAuth>} />
+        <Route path="/bids" element={<BidsLayout />}>
+          <Route index element={<Calls />} />
+          <Route path="call/:id" element={<CallPage />} />
+          <Route path="new" element={<Builder />} />
+          <Route path="mine" element={<MyBids />} />
+          <Route path="archive" element={<Archive />} />
+          <Route path="desk" element={<Desk />} />
+          <Route path=":id" element={<BidSheet />} />
+          <Route path=":id/edit" element={<Builder />} />
+        </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {msg && <div id="toast" role="status">{msg}</div>}

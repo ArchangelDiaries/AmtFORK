@@ -26,3 +26,39 @@ export const FIX = {
   [`${E}/feastPrefs/r1`]: { persona: 'Dragoth', noRestrictions: false, diets: ['Halal'], restrictions: ['Pork'], allergens: { Peanuts: 2 }, notes: '', source: 'ork' },
   [`${E}/feastPrefs/r2`]: { persona: 'Lady Maren', noRestrictions: false, diets: ['Vegetarian'], restrictions: [], allergens: { Gluten: 1 }, notes: 'Separate serving spoon please', source: 'form' },
 };
+
+// Event bids (fictional).
+const bid = (o) => ({ kingdom: 'Westmarch', status: 'submitted', owner: 'u2', hostType: 'park', themeDesc: '', notes: '',
+  site: { name: '', location: '', reserve: 'none', capacity: '', amen: [] }, crats: {}, attendance: { expected: '' },
+  cost: {}, feast: { offered: false }, extras: { as: 'none', fight: 'none', battlegames: [] }, program: { acts: [], schedule: '' },
+  submitter: { persona: '' }, submittedAt: 1790000000000, updatedAt: 1790000000000, ...o });
+Object.assign(FIX, {
+  'kingdomOfficers/elaina@example.com': { role: 'Monarch' },
+  'bidCalls/c1': { category: 'coronation', title: 'Spring Coronation 2027', kingdom: 'Westmarch', term: 'Spring 2027 reign', windowStart: '2027-03-05', windowEnd: '2027-03-28', deadline: '2026-11-14', minCapacity: '150', requirements: 'Camping for 150+ over a full weekend. A covered hall for court. Feast required, with vegetarian options.', status: 'open' },
+  'bidCalls/c2': { category: 'midreign', title: 'Summer Midreign 2027', kingdom: 'Westmarch', windowStart: '2027-06-04', windowEnd: '2027-06-27', deadline: '2027-01-30', status: 'open' },
+  'bidCalls/c0': { category: 'midreign', title: 'Fall EndReign 2026', kingdom: 'Westmarch', windowStart: '2026-10-01', windowEnd: '2026-10-31', deadline: '2026-05-01', status: 'awarded', awardedBid: 'b0' },
+  'bids/b1': bid({ callId: 'c1', category: 'coronation', eventName: 'Coronation of the Ember Crown', theme: 'A Night in the Ember Court', themeDesc: 'Lantern-lit hall, red and gold banners, garb encouraged.', hostPark: 'Siar Geata', start: '2027-03-12', end: '2027-03-14',
+    site: { name: 'Pine Hollow Group Camp', location: 'Julian, CA', reserve: 'hold', capacity: '220', amen: ['tent', 'showers', 'flush', 'water', 'kitchen', 'hall', 'ada'] },
+    crats: { auto: 'Dame Isolde', feast: 'Mistress Wren', war: 'Sir Brannoc', troll: 'Kestrel' }, attendance: { expected: '170', lastYear: '158' },
+    cost: { gatePre: '25', gateDoor: '30', youth: '10', siteRental: '2400', insurance: '175', other: '450', feastCount: '110', feastFee: '12', feastCostPer: '8' },
+    feast: { offered: true, potluck: false, meals: 'Saturday feast, Sunday breakfast', menu: 'Roast chicken, herbed potatoes, honey carrots, apple crumble.', diet: ['veg', 'gf'] },
+    extras: { as: 'dragonmaster', fight: 'weaponmaster', battlegames: [{ theme: 'Siege of the Ember Keep', date: '2027-03-13', start: '09:00', end: '11:00' }, { theme: 'Ashes Ridgeline capture the flag', date: '2027-03-14', start: '09:30', end: '11:30' }] },
+    program: { acts: ['court', 'tourney', 'battle', 'bardic'], schedule: 'Sat: coronation court 10am, crown tournament 1pm, feast 6pm.' }, submitter: { persona: 'Dame Isolde', park: 'Ashen Grove' } }),
+  'bids/b2': bid({ callId: 'c1', category: 'coronation', eventName: 'Coronation at Thornwatch', theme: 'The Frost Gate Falls', hostPark: 'Ethereal Hollow', start: '2027-03-19', end: '2027-03-21',
+    site: { name: 'Cedar Ridge Scout Camp', location: 'Tehachapi, CA', reserve: 'inquired', capacity: '180', amen: ['tent', 'cabins', 'water', 'fires', 'hall'] },
+    crats: { auto: 'Sir Corwin', feast: 'Lady Maren' }, attendance: { expected: '150' }, cost: { gatePre: '20', siteRental: '1900', insurance: '175', other: '300', feastCount: '120', feastFee: '0', feastCostPer: '0' },
+    feast: { offered: true, potluck: true, meals: 'Saturday potluck feast' }, extras: { as: 'as_tourney', fight: 'fighter', battlegames: [{ theme: 'Breaking the Frost Gate', date: '2027-03-20', start: '14:00', end: '16:00' }] }, submitter: { persona: 'Sir Corwin', park: 'Ethereal Hollow' } }),
+  'bids/b3': bid({ category: 'special', eventName: 'Feast of the Gods 2027', theme: 'Olympus Descends', hostType: 'household', hostPark: 'House Ravenmoor', start: '2027-05-14', end: '2027-05-16',
+    site: { name: 'Oak Meadow County Park', location: 'Temecula, CA', reserve: 'hold', capacity: '180', amen: ['tent', 'showers', 'hall'] }, crats: { auto: 'Lady Seraphine', feast: 'Mistress Wren' },
+    attendance: { expected: '120' }, cost: { gatePre: '20', siteRental: '1600', insurance: '175', other: '400', feastCount: '100', feastFee: '15', feastCostPer: '9' },
+    feast: { offered: true, meals: 'Saturday feast of the gods' }, extras: { as: 'as_tourney', fight: 'none', battlegames: [{ theme: 'Titanomachy', date: '2027-05-15', start: '10:00', end: '12:00' }] }, submitter: { persona: 'Lady Seraphine', park: 'Siar Geata' } }),
+  'bids/b4': bid({ category: 'special', eventName: 'Feast of the Gods 2027', theme: 'Twilight of the Norse Gods', hostPark: 'Anduril', start: '2027-05-21', end: '2027-05-23',
+    site: { name: 'Cedar Ridge Scout Camp', location: 'Tehachapi, CA', reserve: 'inquired', capacity: '150' }, crats: { auto: 'Tamsin Quill' }, attendance: { expected: '100' },
+    cost: { gatePre: '15', siteRental: '1200', insurance: '175', other: '200' }, feast: { offered: true, potluck: true }, extras: { as: 'none', fight: 'fighter', battlegames: [{ theme: 'Ragnarok', date: '2027-05-22', start: '13:00', end: '15:30' }] }, submitter: { persona: 'Tamsin Quill', park: 'Anduril' } }),
+  'bids/b0': bid({ callId: 'c0', owner: 'u1', category: 'midreign', eventName: 'Fall EndReign', theme: 'The Fall of the Ashen Crown', hostPark: 'Siar Geata', start: '2026-10-17', end: '2026-10-18', eventId: 'ev1',
+    site: { name: 'Oak Hollow Park', location: 'Pavilion 3', reserve: 'confirmed', capacity: '120' }, crats: { auto: 'Elaina', war: 'Sir Brannoc', feast: 'Mistress Wren' }, attendance: { expected: '80' }, cost: { gatePre: '10' }, submitter: { persona: 'Elaina', park: 'Siar Geata' } }),
+  'bids/b5': bid({ owner: 'u1', status: 'draft', category: 'special', eventName: 'Feast of Fools 2027', hostType: 'company', hostPark: 'Company of the Jester', submitter: { persona: 'Elaina' } }),
+  'bidDecisions/b0': { status: 'accepted', note: 'Awarded at the spring Althing.' },
+  'bidReviews/b1': { rating: 4, note: 'Strong site. Ask about a backup weekend.' },
+});
+FIX['events/ev1'].fromBid = { id: 'b0', name: 'Fall EndReign', host: 'Siar Geata', hostType: 'park', crats: { auto: 'Elaina', war: 'Sir Brannoc', feast: 'Mistress Wren', as: 'Lady Maren' } };
