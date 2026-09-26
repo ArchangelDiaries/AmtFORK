@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../../App.jsx';
 import { updateEvent } from '../../lib/data.js';
-import { EVENT_KINDS, PARKS } from '../../lib/constants.js';
+import EventTypeFields from '../../components/EventTypeFields.jsx';
 
 const SWATCHES = ['#B07F0C', '#B3261E', '#2456B8', '#1C7549', '#6B3FA0', '#9A5B2E', '#0F7C86', '#141C28'];
 
@@ -17,7 +17,7 @@ export default function Overview({ id, e, isAuto }) {
     ev.preventDefault();
     try {
       await updateEvent(id, {
-        name: f.name, kind: f.kind, park: f.park, startDate: f.startDate, endDate: f.endDate || f.startDate,
+        name: f.name, kind: f.kind || 'park', scope: f.scope || 'park', kingdom: f.kingdom || 'Westmarch', park: f.park || '', startDate: f.startDate, endDate: f.endDate || f.startDate,
         location: f.location || '', address: f.address || '', fieldMarshalUrl: f.fieldMarshalUrl || '', theme: f.theme,
         'feast.enabled': !!f.feast?.enabled,
       });
@@ -61,9 +61,9 @@ export default function Overview({ id, e, isAuto }) {
         <fieldset disabled={ro} style={{ border: 0, padding: 0, margin: 0 }} className="form">
           <div className="row">
             <div className="field" style={{ flexBasis: 260 }}><label htmlFor="nm">Event name</label><input id="nm" required value={f.name} onChange={x => set({ name: x.target.value })} /></div>
-            <div className="field"><label htmlFor="kd">Type</label><select id="kd" value={f.kind} onChange={x => set({ kind: x.target.value })}>{EVENT_KINDS.map(k => <option key={k.k} value={k.k}>{k.n}</option>)}</select></div>
-            <div className="field"><label htmlFor="pk">Hosting park</label><input id="pk" list="parks" value={f.park} onChange={x => set({ park: x.target.value })} /></div>
+            
           </div>
+          <EventTypeFields f={f} set={set} idp="ov" />
           <div className="row">
             <div className="field"><label htmlFor="sd">Starts</label><input id="sd" type="date" value={f.startDate} onChange={x => set({ startDate: x.target.value })} /></div>
             <div className="field"><label htmlFor="ed">Ends</label><input id="ed" type="date" min={f.startDate} value={f.endDate} onChange={x => set({ endDate: x.target.value })} /></div>
@@ -79,7 +79,6 @@ export default function Overview({ id, e, isAuto }) {
           </fieldset>
           <div className="field"><label htmlFor="fm">Field Marshal link for the Warmaster Tournament (optional)</label>
             <input id="fm" type="url" value={f.fieldMarshalUrl || ''} onChange={x => set({ fieldMarshalUrl: x.target.value })} placeholder="https://…" /></div>
-          <datalist id="parks">{PARKS.map(p => <option key={p} value={p} />)}</datalist>
         </fieldset>
         {isAuto ? <div className="row"><button className="btn" disabled={!dirty}>Save changes</button>{dirty && <button type="button" className="btn ghost" onClick={() => { setF(e); setDirty(false); }}>Discard</button>}</div>
           : <p className="hint">Only the Autocrat edits the theme and details.</p>}

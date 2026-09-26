@@ -16,7 +16,7 @@ export default function WarmasterPanel({ id, e, regs, sched }) {
   const [busy, setBusy] = useState(false);
   const set = p => setF(x => ({ ...x, ...p }));
   const start = () => setF({
-    name: `${e.name} Warmaster Tournament`, date: days[0] || e.startDate || '', level: PARK_LEVEL[e.park] || 'shire',
+    name: `${e.name} Warmaster Tournament`, date: days[0] || e.startDate || '', level: e.scope === 'kingdom' ? 'kingdom' : (PARK_LEVEL[e.park] || 'shire'),
     pitMin: 10, divs: DIVS.map(d => d.k), addToSchedule: !sched.some(i => i.track === 'warmaster'),
   });
 
@@ -26,7 +26,7 @@ export default function WarmasterPanel({ id, e, regs, sched }) {
     setBusy(true);
     try {
       const marshal = await fmSignInAsMarshal();
-      const tid = await fmCreateTournament({ name: f.name.trim(), date: f.date, park: e.park, level: f.level, pitMin: f.pitMin, divs: f.divs });
+      const tid = await fmCreateTournament({ name: f.name.trim(), date: f.date, park: e.park || `Kingdom of ${e.kingdom || 'Westmarch'}`, level: f.level, pitMin: f.pitMin, divs: f.divs });
       await updateEvent(id, { warmaster: { fmTid: tid, name: f.name.trim(), date: f.date, level: f.level, pitMin: Number(f.pitMin) || 10, divs: f.divs, signupsOpen: true, createdBy: marshal } });
       if (f.addToSchedule) await saveItem(id, { track: 'warmaster', title: f.name.trim(), day: f.date, start: '', end: '', location: '', lead: '', description: `Divisions: ${f.divs.map(k => DIV[k].n).join(', ')}` });
       setF(null); toast('Tournament created in Field Marshal. Players can now sign up from the event page.');

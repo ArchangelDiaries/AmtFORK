@@ -16,7 +16,7 @@ export default function Registrations({ id, e, regs, roles, isAuto }) {
   const count = fn => regs.filter(fn).length;
   const parks = Object.entries(regs.reduce((m, r) => { const p = r.park || 'Unknown'; m[p] = (m[p] || 0) + 1; return m; }, {})).sort((a, b) => b[1] - a[1]);
 
-  async function gate(r) { try { await setCheckIn(id, r.id, !r.checkedIn); } catch (err) { toast('Only the Trollcrat or Autocrat can check people in.'); } }
+  async function gate(r) { try { await setCheckIn(id, r.id, !r.checkedIn); } catch (err) { toast('Only the Gatecrat or Autocrat can check people in.'); } }
   async function del(r) {
     if (armed !== r.id) { setArmed(r.id); setTimeout(() => setArmed(a => (a === r.id ? null : a)), 4000); return; }
     try { await removeRegistration(id, r.id, r.feast); toast('Registration removed.'); } catch (err) { toast('Only the Autocrat can remove registrations.'); }
