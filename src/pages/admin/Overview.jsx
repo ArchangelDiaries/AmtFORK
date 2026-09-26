@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useApp } from '../../App.jsx';
 import { updateEvent } from '../../lib/data.js';
 import EventTypeFields from '../../components/EventTypeFields.jsx';
@@ -30,9 +29,6 @@ export default function Overview({ id, e, isAuto }) {
 
   return (
     <div className="stack">
-      {e.fromBid?.id && <div className="note acc row" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
-        <span>Set up from the winning bid{e.fromBid.host ? ` by ${e.fromBid.host}` : ''}. Dates, site, theme, feast and the bid’s battlegames were carried over. Registration starts closed and the event starts as a draft.</span>
-        <Link className="btn ghost sm" to={`/bids/${e.fromBid.id}`}>View the bid</Link></div>}
       {isAuto && <div className="panel row" style={{ justifyContent: 'space-between' }}>
         <div><b>{e.published ? 'This event is live.' : 'This event is a draft.'}</b>
           <div className="hint">{e.published ? 'Park members can see it on the FORK home page and at its link.' : 'Only crats can see it. Publish when the theme and schedule are ready.'}</div></div>

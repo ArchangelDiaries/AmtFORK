@@ -16,7 +16,6 @@ export default defineConfig({
       { find: /.*\/lib\/firebase\.js$/, replacement: m('firebase.js') },
       { find: /.*\/lib\/data\.js$/, replacement: m('data.js') },
       { find: /.*\/lib\/fieldMarshal\.js$/, replacement: m('fieldMarshal.js') },
-      { find: /.*\/lib\/bidsApi\.js$/, replacement: m('bidsApi.js') },
     ] : [],
   },
   build: {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { signInWithPopup, isSignInWithEmailLink, signInWithEmailLink, sendSignInLinkToEmail } from 'firebase/auth';
 import { auth, google, lower } from '../lib/firebase.js';
 import { Header, useApp } from '../App.jsx';
@@ -9,14 +9,11 @@ const KEY = 'fork.emailForSignIn';
 export default function SignIn() {
   const { user, toast } = useApp();
   const nav = useNavigate();
-  const [qs] = useSearchParams();
-  // Only same-site paths, so a crafted link can't bounce people elsewhere after sign-in.
-  const next = (() => { const n = qs.get('next') || ''; return /^\/(?!\/)/.test(n) ? n : '/crat'; })();
   const [email, setEmail] = useState('');
   const [state, setState] = useState('idle'); // idle | sent | confirm | busy
   const linkMode = isSignInWithEmailLink(auth, location.href);
 
-  useEffect(() => { if (user) nav(next, { replace: true }); }, [user, nav, next]);
+  useEffect(() => { if (user) nav('/crat', { replace: true }); }, [user, nav]);
 
   useEffect(() => {
     if (!linkMode) return;
@@ -35,7 +32,7 @@ export default function SignIn() {
   async function sendLink(e) {
     e.preventDefault(); setState('busy');
     try {
-      await sendSignInLinkToEmail(auth, lower(email), { url: `${location.origin}/signin${next !== '/crat' ? `?next=${encodeURIComponent(next)}` : ''}`, handleCodeInApp: true });
+      await sendSignInLinkToEmail(auth, lower(email), { url: `${location.origin}/signin`, handleCodeInApp: true });
       try { localStorage.setItem(KEY, lower(email)); } catch (e2) { /* ignore */ }
       setState('sent');
     } catch (e2) { console.error(e2); toast('Couldn’t send the link. Check the address.'); setState('idle'); }
@@ -48,7 +45,7 @@ export default function SignIn() {
     <div className="wrap">
       <Header />
       <div className="panel" style={{ maxWidth: 520, margin: '0 auto' }}>
-        <h2>{next.startsWith('/bids') ? 'Sign in to bid' : 'Crat Hall sign in'}</h2>
+        <h2>Crat Hall sign in</h2>
         {state === 'confirm' ? (
           <form className="form" onSubmit={e => { e.preventDefault(); finish(email); }}>
             <p>Confirm the email address your invite was sent to.</p>
@@ -59,7 +56,7 @@ export default function SignIn() {
           <div className="note ok">Check <b>{email}</b> for a sign-in link. Open it on this device.</div>
         ) : (
           <div className="form">
-            <p className="muted">Crats sign in with the email their Autocrat invited. Anyone can sign in to bid on hosting an event. Park members don’t need an account to register for events.</p>
+            <p className="muted">Crats sign in with the email their Autocrat invited. Park members don’t need an account to register for events.</p>
             <button className="btn" onClick={withGoogle} disabled={state === 'busy'}>Continue with Google</button>
             <div className="hint" style={{ textAlign: 'center' }}>or get a sign-in link by email</div>
             <form className="row" onSubmit={sendLink}>

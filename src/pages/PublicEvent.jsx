@@ -97,9 +97,13 @@ function RegisterForm({ id, e }) {
         setFeast({ ...emptyFeast(), noRestrictions: !!p.feast.noRestrictions, diets: p.feast.diets || [], restrictions: p.feast.restrictions || [], allergens: p.feast.allergens || {}, notes: feast.notes });
         setOrk({ state: 'ok', oid, feastFromOrk: true, msg: `Found ${p.persona}. Feast preferences filled in from your ORK profile. Check them below.` });
       } else {
-        setOrk({ state: 'ok', oid, feastFromOrk: false, msg: `Found ${p.persona}. Your ORK feast preferences are private, so fill them in below.` });
+        setOrk({ state: 'ok', oid, feastFromOrk: false, msg: `Found ${p.persona}${p.park ? ` of ${p.park}` : ''}. Persona, park and kingdom are filled in.${e.feast?.enabled ? ' Add your feast preferences below.' : ''}` });
       }
-    } catch (err) { setOrk({ state: 'bad', msg: `${err.message} You can still register by hand.` }); }
+    } catch (err) {
+      setOrk(err.code === 'ork_blocked'
+        ? { state: 'bad', oid, msg: 'The ORK isn’t allowing automatic lookups right now, so fill in your details below. Your ORK number is still saved with your registration.' }
+        : { state: 'bad', oid, msg: `${err.message} You can still register by hand. Your ORK number is still saved.` });
+    }
   }
 
   async function submit(ev) {
@@ -164,7 +168,7 @@ function RegisterForm({ id, e }) {
         {f.eating === 'yes' && <>
           {ork?.feastFromOrk && <span className="pill good" style={{ justifySelf: 'start' }}>From your ORK profile</span>}
           <FeastPicker value={feast} onChange={setFeast} />
-          <p className="hint">Only the Autocrat and Feastcrat see your feast preferences. Tip: in the ORK, turn on <b>Show My Feast Preferences</b> in your profile settings and FORK will fill this in for you next time.</p>
+          <p className="hint">Only the Autocrat and Feastcrat see your feast preferences.</p>
         </>}
       </div>}
 

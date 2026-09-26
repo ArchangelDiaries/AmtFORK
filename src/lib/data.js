@@ -108,7 +108,7 @@ export async function removeRegistration(eid, rid, hadFeast) {
 export async function orkLookup(id) {
   const r = await fetch(`/api/ork?id=${encodeURIComponent(id)}`);
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.error || 'ORK lookup failed');
+  if (!r.ok) { const err = new Error(j.error || 'ORK lookup failed'); err.code = j.code || ''; throw err; }
   return j;
 }
 

@@ -9,7 +9,6 @@ export default function Crats({ id, e, access, roles, isAuto }) {
   const [notes, setNotes] = useState({});
   const contacts = access.contacts || {};
   const signinUrl = `${location.origin}/signin`;
-  const bidName = k => e.fromBid?.crats?.[k] || '';
 
   async function save(ev, invite) {
     ev?.preventDefault();
@@ -35,7 +34,6 @@ export default function Crats({ id, e, access, roles, isAuto }) {
   return (
     <div className="panel">
       <h2>Crats</h2>
-      {e.fromBid?.crats && Object.keys(e.fromBid.crats).length > 0 && <div className="note acc" style={{ marginBottom: 12 }}>This event came from a winning bid. The crats it named are listed below. Add each one’s email to give them access and send their invite.</div>}
       <p className="hint" style={{ marginTop: -6 }}>Crats sign in with the email you give here. Their name shows on the public event page. Their email stays private to the crat team.</p>
       {ROLES.map(r => {
         const c = contacts[r.k]; const mine = roles.includes(r.k) || isAuto;
@@ -56,8 +54,8 @@ export default function Crats({ id, e, access, roles, isAuto }) {
               </form>
             ) : (
               <div className="row" style={{ alignItems: 'center' }}>
-                {c ? <span><b>{c.name}</b> <span className="muted">· {c.email}</span></span> : bidName(r.k) ? <span><span className="muted">Named in the winning bid:</span> <b>{bidName(r.k)}</b></span> : <span className="muted">Not assigned</span>}
-                {isAuto && <button className="btn ghost sm" onClick={() => setEdit({ role: r.k, name: c?.name || bidName(r.k) || '', email: c?.email || '' })}>{c ? 'Change' : bidName(r.k) ? 'Add their email' : 'Assign'}</button>}
+                {c ? <span><b>{c.name}</b> <span className="muted">· {c.email}</span></span> : <span className="muted">Not assigned</span>}
+                {isAuto && <button className="btn ghost sm" onClick={() => setEdit({ role: r.k, name: c?.name || '', email: c?.email || '' })}>{c ? 'Change' : 'Assign'}</button>}
                 {isAuto && c && <button className="btn ghost sm" onClick={() => copyInvite(r.k)}>Copy invite message</button>}
               </div>
             )}

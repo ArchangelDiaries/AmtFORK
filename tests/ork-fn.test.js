@@ -1,33 +1,55 @@
-import { test } from 'node:test';
+import { test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import handler, { orkHeaders } from '../netlify/functions/ork.js';
+import handler from '../netlify/functions/ork.js';
+
+const orig = globalThis.fetch;
+let seen = [];
+beforeEach(() => { process.env.ORK_API_KEY = 'k'.repeat(64); seen = []; });
+afterEach(() => { globalThis.fetch = orig; });
+const mock = routes => { globalThis.fetch = async (url, opts) => {
+  seen.push({ url: String(url), headers: opts.headers });
+  const call = new URL(url).searchParams.get('call');
+  const r = routes[call]; return r ? r() : new Response('{}', { status: 404 });
+}; };
 
 test('rejects bad id', async () => {
   const r = await handler(new Request('https://x/api/ork?id=abc'));
   assert.equal(r.status, 400);
 });
-test('returns parsed profile', async () => {
-  const orig = globalThis.fetch;
-  globalThis.fetch = async url => { assert.match(String(url), /Player\/profile\/23614$/);
-    return new Response('<span class="pn-detail-label">Persona</span><span class="pn-detail-value">Dragoth</span>'); };
-  try {
-    const r = await handler(new Request('https://x/api/ork?id=23614'));
-    const j = await r.json();
-    assert.equal(r.status, 200); assert.equal(j.persona, 'Dragoth'); assert.equal(j.feast.visible, false);
-  } finally { globalThis.fetch = orig; }
+
+test('persona, park and kingdom from the ORK web service, with key headers', async () => {
+  mock({
+    'Player/GetPlayer': () => Response.json({ Player: { Persona: 'Dragoth', ParkId: 246, KingdomId: 21, ShowFeastPrefs: 1 } }),
+    'Park/GetParkShortInfo': () => Response.json({ ParkInfo: { ParkName: 'Siar Geata' }, KingdomInfo: { KingdomName: 'Westmarch' } }),
+  });
+  const r = await handler(new Request('https://x/api/ork?id=23614'));
+  const j = await r.json();
+  assert.equal(r.status, 200);
+  assert.deepEqual([j.persona, j.park, j.kingdom, j.showsFeastPrefs], ['Dragoth', 'Siar Geata', 'Westmarch', true]);
+  const h = seen[0].headers;
+  assert.equal(h['X-Ork-Key'], 'k'.repeat(64));
+  assert.match(h['X-ORK-Client'], /^FORK\//);
+  assert.ok(!h['X-ORK-Client'].includes('k'.repeat(64)), 'key must never go in X-ORK-Client');
+  assert.ok(!seen[0].url.includes('k'.repeat(64)), 'key must never go in the URL');
+  assert.match(seen[0].url, /orkservice\/Json\/index\.php\?call=Player%2FGetPlayer&request%5BMundaneId%5D=23614/);
 });
 
-test('sends the ORK identification headers and never leaks the key', () => {
-  const key = 'ab'.repeat(32);
-  const h = orkHeaders({ ORK_KEY: key, ORK_CLIENT: 'FORK/1.1', ORK_USER_AGENT: 'FORK/1.1 (+https://fork.example; me@example.com)' });
-  assert.equal(h['x-ork-key'], key); assert.equal(h['x-ork-client'], 'FORK/1.1'); assert.match(h['user-agent'], /^FORK\/1\.1 /);
-  assert.equal(orkHeaders({ ORK_KEY: key, ORK_CLIENT: key })['x-ork-client'], 'FORK/1.1', 'a key pasted into ORK_CLIENT is replaced');
-  assert.equal(orkHeaders({ ORK_CLIENT: 'Amtgard/9' })['x-ork-client'], 'FORK/1.1', 'reserved prefix is replaced');
-  assert.equal(orkHeaders({ ORK_KEY: 'short' })['x-ork-key'], undefined, 'malformed keys are not sent');
+test('unknown player', async () => {
+  mock({ 'Player/GetPlayer': () => Response.json({ Status: { Status: 1 } }) });
+  const r = await handler(new Request('https://x/api/ork?id=99999'));
+  assert.equal(r.status, 404);
 });
-test('passes the headers on the ORK request', async () => {
-  const orig = globalThis.fetch; const k = process.env.ORK_KEY; process.env.ORK_KEY = 'cd'.repeat(32);
-  let seen; globalThis.fetch = async (url, init) => { seen = init.headers; return new Response('<span class="pn-detail-label">Persona</span><span class="pn-detail-value">Dragoth</span>'); };
-  try { await handler(new Request('https://x/api/ork?id=23614')); assert.equal(seen['x-ork-key'], 'cd'.repeat(32)); assert.ok(seen['x-ork-client']); }
-  finally { globalThis.fetch = orig; if (k === undefined) delete process.env.ORK_KEY; else process.env.ORK_KEY = k; }
+
+test('Cloudflare 403 is reported as ork_blocked', async () => {
+  mock({ 'Player/GetPlayer': () => new Response('<html><head><title>Just a moment...</title></head></html>', { status: 403 }) });
+  const r = await handler(new Request('https://x/api/ork?id=23614'));
+  const j = await r.json();
+  assert.equal(r.status, 503); assert.equal(j.code, 'ork_blocked');
+});
+
+test('missing key setting is reported, not sent', async () => {
+  delete process.env.ORK_API_KEY;
+  mock({});
+  const r = await handler(new Request('https://x/api/ork?id=23614'));
+  assert.equal(r.status, 503); assert.equal(seen.length, 0);
 });
