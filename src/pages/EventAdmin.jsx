@@ -4,7 +4,7 @@ import { Header, useApp } from '../App.jsx';
 import { lower } from '../lib/firebase.js';
 import { useDoc, useQuery, col } from '../lib/data.js';
 import { fmtRange } from '../lib/util.js';
-import { ROLE, EVENT_KINDS } from '../lib/constants.js';
+import { ROLE, eventType, eventHost } from '../lib/constants.js';
 import Overview from './admin/Overview.jsx';
 import Crats from './admin/Crats.jsx';
 import ScheduleAdmin from './admin/ScheduleAdmin.jsx';
@@ -49,7 +49,7 @@ export default function EventAdmin() {
       <Header />
       <div className="row" style={{ justifyContent: 'space-between', marginBottom: 12 }}>
         <div>
-          <div className="eyebrow">{EVENT_KINDS.find(k => k.k === e.kind)?.n} · {e.park} · {fmtRange(e.startDate, e.endDate)}</div>
+          <div className="eyebrow">{eventType(e)} · {eventHost(e)} · {fmtRange(e.startDate, e.endDate)}</div>
           <h2 style={{ fontSize: '1.7rem' }}>{e.name || 'Untitled event'}</h2>
           <div className="checks" style={{ marginTop: 6 }}>
             {(isOwner && !roles.includes('auto') ? ['auto', ...roles] : roles).map(r => <span key={r} className="pill accent">{ROLE[r]?.n}</span>)}

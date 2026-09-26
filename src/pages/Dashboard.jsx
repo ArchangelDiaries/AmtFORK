@@ -5,7 +5,8 @@ import { db, lower } from '../lib/firebase.js';
 import { Header, useApp } from '../App.jsx';
 import { useQuery, col, createEvent } from '../lib/data.js';
 import { fmtRange } from '../lib/util.js';
-import { ROLE, EVENT_KINDS, PARKS } from '../lib/constants.js';
+import { ROLE, eventType, eventHost } from '../lib/constants.js';
+import EventTypeFields from '../components/EventTypeFields.jsx';
 
 export default function Dashboard() {
   const { user, toast } = useApp();
@@ -34,16 +35,16 @@ export default function Dashboard() {
       <Header />
       <div className="row" style={{ justifyContent: 'space-between', marginBottom: 14 }}>
         <div><div className="eyebrow">Crat Hall</div><h2 style={{ fontSize: '1.5rem' }}>Your events</h2></div>
-        <button className="btn accent" onClick={() => setF(f ? null : { name: '', kind: 'park', park: 'Siar Geata', startDate: '', endDate: '', feast: null })}>{f ? 'Cancel' : 'New event'}</button>
+        <button className="btn accent" onClick={() => setF(f ? null : { name: '', kind: 'park', scope: 'park', kingdom: 'Westmarch', park: 'Siar Geata', startDate: '', endDate: '', feast: null })}>{f ? 'Cancel' : 'New event'}</button>
       </div>
       {f && (
         <form className="panel form" onSubmit={create} style={{ marginBottom: 18 }}>
           <h2>New event</h2>
           <div className="row">
             <div className="field" style={{ flexBasis: 260 }}><label htmlFor="n">Event name</label><input id="n" required value={f.name} onChange={e => setF({ ...f, name: e.target.value })} placeholder="Fall EndReign" /></div>
-            <div className="field"><label htmlFor="k">Type</label><select id="k" value={f.kind} onChange={e => setF({ ...f, kind: e.target.value })}>{EVENT_KINDS.map(k => <option key={k.k} value={k.k}>{k.n}</option>)}</select></div>
-            <div className="field"><label htmlFor="p">Hosting park</label><input id="p" list="parks" value={f.park} onChange={e => setF({ ...f, park: e.target.value })} /></div>
+            
           </div>
+          <EventTypeFields f={f} set={p => setF({ ...f, ...p })} idp="new" />
           <div className="row">
             <div className="field"><label htmlFor="s">Starts</label><input id="s" type="date" required value={f.startDate} onChange={e => setF({ ...f, startDate: e.target.value, endDate: f.endDate || e.target.value })} /></div>
             <div className="field"><label htmlFor="en">Ends</label><input id="en" type="date" value={f.endDate} min={f.startDate} onChange={e => setF({ ...f, endDate: e.target.value })} /></div>
@@ -58,13 +59,12 @@ export default function Dashboard() {
           </fieldset>
           <p className="hint">You’ll be the Autocrat. Theme, crats, schedule and feast come next.</p>
           <div><button className="btn">Create event</button></div>
-          <datalist id="parks">{PARKS.map(p => <option key={p} value={p} />)}</datalist>
         </form>
       )}
       {acc.loading ? <p className="muted">Loading…</p> : mine.length ? (
         <div className="cards">{mine.map(({ a, e }) => (
           <Link key={e.id} to={`/crat/${e.id}`} className="panel card" style={{ '--ev': e.theme?.accent }}>
-            <div className="eyebrow">{EVENT_KINDS.find(k => k.k === e.kind)?.n} · {e.park}</div>
+            <div className="eyebrow">{eventType(e)} · {eventHost(e)}</div>
             <h3>{e.name}</h3>
             <div className="muted">{fmtRange(e.startDate, e.endDate)}</div>
             <div className="checks">{(a.roles?.[email] || []).map(r => <span key={r} className="pill accent">{ROLE[r]?.n}</span>)}

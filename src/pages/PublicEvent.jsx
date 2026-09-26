@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Header, useApp } from '../App.jsx';
 import { useDoc, useQuery, col, register, orkLookup } from '../lib/data.js';
 import { fmtRange, fmtDay, eventDays } from '../lib/util.js';
-import { EVENT_KINDS, ROLES, PARKS, parseOrkId, ORK_PLAYER_URL } from '../lib/constants.js';
+import { eventType, eventHost, ROLES, PARKS, parseOrkId, ORK_PLAYER_URL } from '../lib/constants.js';
 import Schedule from '../components/Schedule.jsx';
 import FeastPicker, { emptyFeast } from '../components/FeastPicker.jsx';
 import { DIV, fmRequestSignup } from '../lib/fieldMarshal.js';
@@ -25,7 +25,7 @@ export default function PublicEvent() {
         <Header />
         {!e.published && <div className="note acc" style={{ marginBottom: 14 }}>Draft preview. Only crats can see this page until the Autocrat publishes it.</div>}
         <section className="hero">
-          <div className="eyebrow">{EVENT_KINDS.find(k => k.k === e.kind)?.n} · hosted by {e.park}</div>
+          <div className="eyebrow">{eventType(e)} · {e.scope === 'kingdom' ? eventHost(e) : `hosted by ${e.park}`}</div>
           <h1>{e.name}</h1>
           {e.theme?.title && <div className="theme">{e.theme.title}</div>}
           {e.theme?.tagline && <p style={{ margin: '6px 0 0', fontStyle: 'italic' }}>{e.theme.tagline}</p>}

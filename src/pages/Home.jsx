@@ -4,7 +4,7 @@ import { query, where } from 'firebase/firestore';
 import { Header } from '../App.jsx';
 import { useQuery, col } from '../lib/data.js';
 import { fmtRange } from '../lib/util.js';
-import { EVENT_KINDS } from '../lib/constants.js';
+import { eventType, eventHost } from '../lib/constants.js';
 
 export default function Home() {
   const { rows, loading } = useQuery(() => query(col('events'), where('published', '==', true)), []);
@@ -13,7 +13,7 @@ export default function Home() {
   const past = rows.filter(e => !upcoming.includes(e)).sort((a, b) => (b.startDate || '').localeCompare(a.startDate || ''));
   const card = e => (
     <Link key={e.id} to={`/e/${e.id}`} className="panel card" style={{ '--ev': e.theme?.accent }}>
-      <div className="eyebrow">{EVENT_KINDS.find(k => k.k === e.kind)?.n} · {e.park}</div>
+      <div className="eyebrow">{eventType(e)} · {eventHost(e)}</div>
       <h3>{e.name}</h3>
       {e.theme?.title && <div style={{ fontFamily: 'var(--display)', color: e.theme.accent }}>{e.theme.title}</div>}
       <div className="muted">{fmtRange(e.startDate, e.endDate)}{e.location ? ` · ${e.location}` : ''}</div>
