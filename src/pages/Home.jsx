@@ -23,6 +23,10 @@ export default function Home() {
   return (
     <div className="wrap">
       <Header />
+      <div className="note acc row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+        <span><b>Want to host an event?</b> Parks and the kingdom post calls for bids in The Herald’s Call. Autocrats answer with a bid, and the winning bid becomes a FORK event.</span>
+        <a className="btn sm" href="/herald/">See calls for bids</a>
+      </div>
       <h2 style={{ fontSize: '1.5rem', marginBottom: 12 }}>Upcoming events</h2>
       {loading ? <p className="muted">Loading…</p> : upcoming.length ? <div className="cards">{upcoming.map(card)}</div>
         : <div className="panel empty"><h2>No events posted yet</h2><p>When your park’s Autocrat publishes an event, it shows up here with its schedule and signup.</p></div>}

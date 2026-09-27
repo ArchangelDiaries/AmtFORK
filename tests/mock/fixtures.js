@@ -1,6 +1,11 @@
 // Fictional sample data for UI previews only.
 const E = 'events/ev1';
 export const FIX = {
+  'herald_bids/bid1': { callId: 'c1', category: 'endreign', callPark: 'Siar Geata', kingdom: 'Westmarch', eventName: 'Winter EndReign', theme: 'The Long Night', themeDesc: 'Lanterns and oaths.',
+    hostType: 'park', hostPark: 'Siar Geata', start: '2027-01-16', end: '2027-01-17', site: { name: 'Pine Flats', location: 'Group camp B' },
+    cost: { feastFee: '10', feastCount: '50' }, feast: { offered: true, meals: 'Saturday feast', menu: 'Stew and bread' },
+    crats: [{ role: 'Autocrat', name: 'Sir Brannoc' }, { role: 'Feastocrat', name: 'Mistress Wren' }], submitter: { persona: 'Sir Brannoc', park: 'Siar Geata', contact: 'brannoc@example.com' }, status: 'submitted' },
+  'herald_decisions/bid1': { status: 'accepted', note: 'Voted 5-1.' },
   [E]: { name: 'Fall EndReign', kind: 'endreign', scope: 'kingdom', kingdom: 'Westmarch', park: 'Siar Geata', startDate: '2026-10-17', endDate: '2026-10-18', location: 'Oak Hollow Park', address: 'Pavilion 3',
     theme: { title: 'The Fall of the Ashen Crown', tagline: 'The old reign ends at dusk. Who will stand when the banners fall?', story: 'The Ashen Crown has worn thin.\nGarb in greys and golds; bring a token for the final court.', accent: '#9A5B2E' },
     feast: { enabled: true, price: '$12, kids free', capacity: '60', menu: 'Roast chicken, root vegetables, bread and honey butter, apple crumble.', notes: 'Bring your own feast gear.' },

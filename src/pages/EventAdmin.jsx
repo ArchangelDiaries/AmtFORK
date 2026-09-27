@@ -5,6 +5,7 @@ import { lower } from '../lib/firebase.js';
 import { useDoc, useQuery, col } from '../lib/data.js';
 import { fmtRange } from '../lib/util.js';
 import { ROLE, eventType, eventHost } from '../lib/constants.js';
+import { bidUrl } from '../lib/herald.js';
 import Overview from './admin/Overview.jsx';
 import Crats from './admin/Crats.jsx';
 import ScheduleAdmin from './admin/ScheduleAdmin.jsx';
@@ -56,6 +57,7 @@ export default function EventAdmin() {
             <span className={`pill ${e.published ? 'good' : ''}`}>{e.published ? 'Published' : 'Draft'}</span>
             {e.registrationOpen ? <span className="pill good">Registration open</span> : <span className="pill">Registration closed</span>}
             <span className="pill">{e.feast?.enabled ? 'Feast' : 'No feast'}</span>
+            {e.fromBid?.id && <a className="pill accent" href={bidUrl(e.fromBid.id)} style={{ textDecoration: 'none' }}>From the winning bid ↗</a>}
           </div>
         </div>
         <Link className="btn ghost" to={`/e/${id}`} target="_blank">View public page</Link>

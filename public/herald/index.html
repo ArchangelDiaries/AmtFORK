@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Herald’s Call</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700;800&family=Alegreya+Sans:wght@400;500;700;800&display=swap">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0} img{max-width:100%} [hidden]{display:none!important}
+.auth{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+</style>
+<style>
+:root{
+  --bg:#EEEDEA; --panel:#FFFFFF; --panel2:#F6F5F2; --ink:#1B1A22; --muted:#625F6B; --line:#D8D5CF;
+  --btn:#1B1A22; --btn-ink:#FFFFFF;
+  --seal:#9E2A2B; --seal-soft:#F5E3E1; --or:#A87708; --or-soft:#F6EBCB;
+  --c-midreign:#2456B8; --c-coronation:#A87708; --c-special:#6B3FA0; --c-endreign:#1C7549;
+  --good:#1C7549; --warn:#B3261E; --pend:#6E6A78;
+  --display:"Alegreya SC","Palatino Linotype",Georgia,serif;
+  --body:"Alegreya Sans","Gill Sans","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#121117; --panel:#1B1A22; --panel2:#22212A; --ink:#ECEAF0; --muted:#A09CAA; --line:#34323D;
+    --btn:#ECEAF0; --btn-ink:#121117;
+    --seal:#E4726B; --seal-soft:#3A1F20; --or:#E3B43E; --or-soft:#3A3016;
+    --c-midreign:#6B97EE; --c-coronation:#E3B43E; --c-special:#A781DE; --c-endreign:#45B97F;
+    --good:#45B97F; --warn:#E65E52; --pend:#A09CAA;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121117; --panel:#1B1A22; --panel2:#22212A; --ink:#ECEAF0; --muted:#A09CAA; --line:#34323D;
+  --btn:#ECEAF0; --btn-ink:#121117;
+  --seal:#E4726B; --seal-soft:#3A1F20; --or:#E3B43E; --or-soft:#3A3016;
+  --c-midreign:#6B97EE; --c-coronation:#E3B43E; --c-special:#A781DE; --c-endreign:#45B97F;
+  --good:#45B97F; --warn:#E65E52; --pend:#A09CAA;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;padding:0 16px 96px}
+.wrap{max-width:1140px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);font-weight:700;line-height:1.1;text-wrap:balance;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--seal);outline-offset:2px}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-size:.78rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700}
+
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;padding-block:22px 16px;border-bottom:2px solid var(--ink)}
+.brand h1{font-size:clamp(1.8rem,4.5vw,2.5rem)}
+.brand .tag{margin:6px 0 0;color:var(--muted);font-style:italic}
+.role{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);font-weight:700;font-size:.9rem}
+.role .dot{width:9px;height:9px;border-radius:50%;background:var(--pend)}
+.role.officer .dot{background:var(--seal)}
+
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:14px 0 22px;overflow-x:auto}
+.tabs button{background:none;border:none;border-bottom:3px solid transparent;padding:10px 14px 9px;font-family:var(--display);font-weight:700;font-size:1.08rem;color:var(--muted);white-space:nowrap}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--seal)}
+.badge{display:inline-block;margin-left:6px;min-width:1.5em;padding:0 6px;border-radius:999px;background:var(--seal);color:#fff;font-family:var(--body);font-size:.72rem;line-height:1.5em;vertical-align:2px;text-align:center}
+
+.btn{border:1px solid var(--btn);background:var(--btn);color:var(--btn-ink);padding:9px 14px;border-radius:8px;font-weight:700;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.btn.seal{background:var(--seal);border-color:var(--seal);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--ink)}
+.btn.danger{background:transparent;color:var(--warn);border-color:var(--warn)}
+.btn.danger.armed{background:var(--warn);color:#fff}
+.btn.sm{padding:5px 10px;font-size:.88rem}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.linkish{background:none;border:none;padding:0;font:inherit;font-weight:700;color:inherit;text-align:left;cursor:pointer}
+.linkish:hover{text-decoration:underline}
+.back{margin-bottom:14px}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;min-width:0}
+.panel h2{font-size:1.3rem;margin-bottom:12px}
+.stack{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.between{justify-content:space-between}
+.field{display:grid;gap:4px;flex:1 1 180px;min-width:0}
+.field.wide{flex-basis:100%}
+.field.xs{flex:0 1 130px}
+.field label,.lbl{font-size:.78rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.field input,.field select,.field textarea,.search{padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);width:100%}
+.field textarea{resize:vertical;min-height:84px}
+.field .hint{font-size:.84rem;color:var(--muted)}
+.field.bad input,.field.bad select{border-color:var(--warn);box-shadow:0 0 0 1px var(--warn)}
+.money{position:relative}
+.money::before{content:"$";position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:700;pointer-events:none}
+.money input{padding-left:24px}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.checks label{display:inline-flex;align-items:center;gap:7px;padding:7px 12px 7px 10px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);font-weight:500;cursor:pointer}
+.checks label:has(input:checked){border-color:var(--seal);background:var(--seal-soft)}
+.checks input{accent-color:var(--seal)}
+.catpick{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.catpick label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);cursor:pointer;border-left:5px solid var(--cc)}
+.catpick label:has(input:checked){background:color-mix(in srgb,var(--cc) 12%,var(--panel));border-color:var(--cc)}
+.catpick small{display:block;color:var(--muted)}
+
+/* category + status marks */
+.cat{display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--cc)}
+.cat::before{content:"";width:10px;height:10px;transform:rotate(45deg);background:var(--cc);border-radius:2px}
+.st{display:inline-block;border-radius:6px;padding:2px 8px;font-size:.8rem;font-weight:800;white-space:nowrap;border:1px solid var(--line);color:var(--muted)}
+.st.open,.st.submitted{border-color:var(--c-midreign);color:var(--c-midreign)}
+.st.review{border-color:var(--or);color:var(--ink);background:var(--or-soft)}
+.st.awarded,.st.accepted{border-color:var(--good);color:var(--good)}
+.st.declined{border-color:var(--warn);color:var(--warn)}
+.st.draft{border-style:dashed}
+.st.withdrawn,.st.closed{text-decoration:line-through}
+.ex{display:inline-block;border:1px dashed var(--muted);color:var(--muted);border-radius:6px;padding:0 6px;font-size:.72rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;vertical-align:2px}
+
+/* calls */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border:1px solid var(--line);border-radius:999px;background:var(--panel);font-weight:700}
+.chip small{color:var(--muted);font-weight:500}
+.chip.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:16px}
+.ccard{display:grid;gap:10px;border-top:5px solid var(--cc);align-content:start}
+.ccard h3{font-size:1.3rem}
+.meta{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.95rem;margin:0}
+.meta dt{color:var(--muted);font-weight:700;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase;padding-top:3px}
+.meta dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.due{font-weight:800}
+.due.soon{color:var(--warn)}
+.acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* builder */
+.bgrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+@media (max-width:900px){.bgrid{grid-template-columns:minmax(0,1fr)}}
+.sec{display:grid;gap:14px}
+.sec>h2{display:flex;align-items:baseline;gap:10px;margin:0}
+.sec>h2 .n{font-family:var(--body);font-weight:800;font-size:.9rem;color:var(--seal)}
+.side{position:sticky;top:calc(12px + env(safe-area-inset-top,0px));display:grid;gap:14px}
+@media (max-width:900px){.side{position:static}}
+.ledger{display:grid;gap:6px;font-size:.95rem}
+.ledger .l{display:flex;justify-content:space-between;gap:10px;font-variant-numeric:tabular-nums}
+.ledger .l.tot{border-top:1px solid var(--line);padding-top:6px;font-weight:800}
+.ledger .neg{color:var(--warn)} .ledger .pos{color:var(--good)}
+.crat{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto;gap:8px;align-items:center}
+.crat input{padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);width:100%}
+@media (max-width:520px){.crat{grid-template-columns:minmax(0,1fr) auto;padding-bottom:6px;border-bottom:1px solid var(--line)}.crat input:nth-child(1){grid-row:1;grid-column:1}.crat .xbtn{grid-row:1;grid-column:2}.crat input:nth-child(2){grid-row:2;grid-column:1/-1}.savebar .in>span{display:none}}
+.xbtn{border:1px solid var(--line);background:transparent;border-radius:8px;width:38px;height:38px;font-size:1.2rem;color:var(--muted)}
+.savebar{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--panel);border-top:1px solid var(--line);z-index:4}
+.savebar .in{max-width:1140px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.forcall{padding:12px 14px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);font-size:.95rem}
+
+/* bid sheet */
+.sheet-head{display:grid;gap:8px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.sheet-head h2{font-size:clamp(1.5rem,4vw,2rem);margin:0}
+.sheet-head .theme{font-style:italic;color:var(--muted);font-size:1.1rem}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}
+.sgrid h3{font-size:1.1rem;margin-bottom:8px}
+.amen{display:flex;flex-wrap:wrap;gap:6px}
+.amen span{padding:2px 9px;border-radius:6px;font-size:.85rem;border:1px solid var(--line)}
+.amen span.y{border-color:var(--good);color:var(--good);font-weight:700}
+.amen span.n{color:var(--muted);text-decoration:line-through;opacity:.7}
+.prose{white-space:pre-wrap;margin:0;max-width:65ch}
+.decision{border-left:4px solid var(--seal)}
+
+/* tables */
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+td small{display:block;color:var(--muted)}
+tr.click{cursor:pointer}
+tr.click:hover td{background:var(--panel2)}
+.cmp th{position:sticky;left:0;background:var(--panel);min-width:130px;z-index:1}
+.cmp td{min-width:190px}
+.cmp tr.win td{background:color-mix(in srgb,var(--good) 8%,transparent)}
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.filters select{padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.filters .search{flex:1 1 240px;background:var(--panel)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.tile .l{font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.tile .v{font-weight:800;font-size:1.6rem;font-variant-numeric:tabular-nums;line-height:1.15}
+
+.empty{text-align:center;padding:40px 16px;color:var(--muted)}
+.empty h2{color:var(--ink);margin-bottom:8px}
+.none{color:var(--muted);font-style:italic}
+.foot{margin-top:12px;font-size:.88rem;color:var(--muted)}
+.banner{padding:12px 14px;border-radius:10px;background:var(--or-soft);border:1px solid var(--or);margin-bottom:16px}
+/* monarch's desk */
+.deskhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:14px}
+.deskhead h2{font-size:clamp(1.4rem,4vw,1.9rem)}
+.cgrid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px;margin-bottom:16px}
+.bars{display:grid;gap:10px}
+.bar{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) auto;gap:10px;align-items:center;font-size:.92rem}
+.bar .nm{font-weight:700;line-height:1.2}
+.bar .track{position:relative;height:14px;border-radius:0 4px 4px 0;background:color-mix(in srgb,var(--c-midreign) 16%,transparent)}
+.bar .fill{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0;background:var(--c-midreign)}
+.bar .val{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--muted)}
+.bar .val b{color:var(--ink)}
+.dv{position:relative;height:14px}
+.dv::before{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:1px;background:var(--muted)}
+.dv .fill{position:absolute;top:0;bottom:0}
+.dv .fill.pos{left:50%;background:var(--good);border-radius:0 4px 4px 0}
+.dv .fill.neg{right:50%;background:var(--warn);border-radius:4px 0 0 4px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.85rem;color:var(--muted);margin-bottom:10px}
+.legend i{display:inline-block;width:12px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.stars{display:inline-flex;gap:2px}
+.stars button{background:none;border:none;padding:2px;font-size:1.15rem;line-height:1;color:var(--line)}
+.stars button.on{color:var(--or)}
+.bgcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:12px}
+.bgcard{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--panel2)}
+.bgcard h3{font-size:1.02rem;margin-bottom:8px}
+.bgl{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:.92rem}
+.bgl li{display:grid;gap:0}
+.bgl .t{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.84rem}
+.mx{min-width:1040px}.mx td{white-space:nowrap}.mx td:first-child{white-space:normal;min-width:200px}
+.bgrow{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,.8fr) minmax(0,.8fr) auto;gap:8px;align-items:center}
+.bgrow input{padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);width:100%}
+@media (max-width:620px){.bgrow{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;padding-bottom:8px;border-bottom:1px solid var(--line)}.bgrow input:first-child{grid-column:1/3}.bgrow .xbtn{grid-row:1;grid-column:3}}
+@media (max-width:520px){.bar{grid-template-columns:minmax(0,1fr) auto}.bar .nm{grid-column:1/-1}}
+.opt{display:grid;gap:6px}
+#tip{position:fixed;z-index:7;pointer-events:none;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;box-shadow:0 6px 20px rgba(0,0,0,.18);font-size:.88rem;max-width:260px;white-space:pre-line}
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--btn);color:var(--btn-ink);padding:10px 16px;border-radius:8px;font-weight:700;max-width:calc(100% - 32px);box-shadow:0 6px 24px rgba(0,0,0,.25);z-index:6}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="eyebrow">Amtgard · Event Bids · <a href="/" style="color:inherit">part of FORK</a></div>
+      <h1>The Herald’s Call</h1>
+      <p class="tag">Where kingdoms call for events and players answer with a bid</p>
+    </div>
+    <a class="btn ghost sm" href="/" style="margin-left:auto;margin-right:8px">FORK events</a><span id="role" class="role"><span class="dot"></span><span id="roleTxt">Connecting…</span></span>
+  </header>
+  <nav class="tabs" id="tabs">
+    <button data-act="tab" data-v="calls">Calls for Bids</button>
+    <button data-act="tab" data-v="build">Build a Bid</button>
+    <button data-act="tab" data-v="mine">My Bids<span id="mineCount" class="badge" hidden></span></button>
+    <button data-act="tab" data-v="archive">Bid Archive</button>
+    <button data-act="tab" data-v="desk" id="deskTab" hidden>Bid Desk</button>
+  </nav>
+  <div id="notice"></div>
+  <main id="view"></main>
+</div>
+<div id="savebar" class="savebar" hidden></div>
+<div id="toast" hidden></div>
+<div id="tip" hidden></div>
+
+<datalist id="kingdoms">
+  <option value="Westmarch"></option><option value="Burning Lands"></option><option value="Celestial Kingdom"></option>
+  <option value="Crystal Groves"></option><option value="Desert Winds"></option><option value="Dragonspine"></option>
+  <option value="Emerald Hills"></option><option value="Golden Plains"></option><option value="Goldenvale"></option>
+  <option value="Iron Mountains"></option><option value="Neverwinter"></option><option value="Northern Lights"></option>
+  <option value="Polaris"></option><option value="Rising Winds"></option><option value="Tal Dagore"></option>
+  <option value="Wetlands"></option><option value="Winter's Edge"></option>
+</datalist>
+<datalist id="parks">
+  <option value="Siar Geata"></option><option value="Anduril"></option><option value="Ashen Grove"></option>
+  <option value="Ethereal Hollow"></option><option value="Quixotic Valley"></option><option value="Emerald Dunes"></option>
+</datalist>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="firebase-adapter.js"></script>
+<script>
+/* ---------- constants ---------- */
+const CATS=[
+  {k:'midreign',n:'Kingdom Midreign',d:'Held mid-reign: tournaments, battlegames, court'},
+  {k:'coronation',n:'Coronation',d:'The crown passes to the new monarchy'},
+  {k:'endreign',n:'EndReign',d:'Closes out a reign: court, tournaments, feast'},
+  {k:'special',n:'Special Event',d:'Olympiad, Warmaster, feasts, war weekends and more'}];
+const CAT=Object.fromEntries(CATS.map(c=>[c.k,c]));
+const CALL_ST={open:'Accepting bids',review:'Under review',awarded:'Awarded',closed:'Closed'};
+const CALL_ST_X={community:'Community-hosted'};
+const BID_ST={draft:'Draft',submitted:'Submitted',accepted:'Accepted',declined:'Declined',withdrawn:'Withdrawn'};
+const AMEN=[['tent','Tent camping'],['cabins','Cabins / bunkhouses'],['rv','RV hookups'],['showers','Showers'],['flush','Flush toilets'],['water','Potable water'],['power','Power at site'],['fires','Campfires allowed'],['pets','Pets allowed'],['ada','ADA accessible'],['kitchen','Kitchen for feast'],['hall','Covered hall / pavilion']];
+const RESERVE={none:'Not contacted yet',inquired:'Inquired',hold:'Dates on hold',confirmed:'Confirmed, deposit paid'};
+const DIET=[['veg','Vegetarian'],['vegan','Vegan'],['gf','Gluten-free'],['df','Dairy-free'],['nut','Nut-free'],['halal','Halal / kosher on request']];
+const ACTS=[['tourney','Tournaments'],['battle','Battlegames'],['quest','Quest / module'],['court','Royal court'],['as','Arts & Sciences'],['bardic','Bardic circle'],['merch','Merchants'],['class','Classes / workshops'],['kids','Youth activities']];
+const AS_OPT=[['none','None'],['dragonmaster','Dragonmaster'],['as_tourney','A&S tourney']];
+const FIGHT_OPT=[['none','None'],['weaponmaster','Weaponmaster'],['fighter','Fighter tournament']];
+const optName=(list,k)=>(list.find(x=>x[0]===k)||[,'Not set'])[1];
+const feastStyle=b=>!b.feast?.offered?'No feast':b.feast?.potluck?'Potluck':'Cooked feast';
+const fTime=t=>{if(!t)return '';const [h,m]=t.split(':').map(Number);return `${(h%12)||12}:${String(m).padStart(2,'0')}${h<12?'am':'pm'}`;};
+const HOST_TYPES=[['park','Park'],['household','Household'],['company','Company'],['guild','Guild'],['individual','Individual'],['kingdom','Kingdom']];
+const KINGDOM_EVENTS=['Feast of the Gods','Feast of Fools','Feast of the Dead'];
+const hostLabel=b=>b.hostPark?`${esc(b.hostPark)}${b.hostType&&b.hostType!=='park'?' ('+esc(optName(HOST_TYPES,b.hostType).toLowerCase())+')':''}`:'';
+const CRAT_ROLES=['Autocrat','Co-Autocrat','Feastocrat','Troll (gate)','Reeve coordinator','Battlegame / quest lead','Site & safety lead'];
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cc=k=>`--cc:var(--c-${CAT[k]?k:'special'})`;
+const catMark=k=>`<span class="cat" style="${cc(k)}">${esc(CAT[k]?.n||'Uncategorized')}</span>`;
+const num=v=>{const n=parseFloat(v);return isFinite(n)?n:0;};
+const money=n=>(n<0?'−':'')+'$'+Math.abs(Math.round(n)).toLocaleString('en-US');
+const pDate=d=>{if(!d)return null;const [y,m,dd]=d.split('-').map(Number);return new Date(y,m-1,dd);};
+const fDate=d=>{const x=pDate(d);return x?x.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';};
+function fRange(a,b){const A=pDate(a),B=pDate(b);if(!A)return '<span class="muted">Dates TBD</span>';if(!B||a===b)return fDate(a);
+  const mo=o=>o.toLocaleDateString('en-US',{month:'short'});
+  if(A.getFullYear()===B.getFullYear()&&A.getMonth()===B.getMonth()) return `${mo(A)} ${A.getDate()}–${B.getDate()}, ${A.getFullYear()}`;
+  if(A.getFullYear()===B.getFullYear()) return `${mo(A)} ${A.getDate()} – ${mo(B)} ${B.getDate()}, ${A.getFullYear()}`;
+  return `${fDate(a)} – ${fDate(b)}`;}
+const today=()=>{const t=new Date();t.setHours(0,0,0,0);return t;};
+const daysTo=d=>{const x=pDate(d);return x?Math.round((x-today())/864e5):null;};
+const bgSorted=b=>(b.extras?.battlegames||[]).filter(g=>g.theme||g.start).slice().sort((x,y)=>((x.date||'')+(x.start||'')).localeCompare((y.date||'')+(y.start||'')));
+const fDay=d=>{const x=pDate(d);return x?x.toLocaleDateString('en-US',{weekday:'short'}):'';};
+const bgWhen=g=>[fDay(g.date),g.start?fTime(g.start)+(g.end?'–'+fTime(g.end):''):''].filter(Boolean).join(' ')||'Time TBD';
+const yearOf=b=>(b.start||'').slice(0,4);
+
+/* ---------- state ---------- */
+const S={db:null,user:null,me:null,officer:false,ready:false,offline:false,calls:[],bids:[],dec:{},
+  view:'calls',sel:null,prev:'calls',catF:'all',draft:null,editId:null,confirm:null,bad:new Set(),
+  arch:{q:'',kingdom:'all',cat:'all',year:'all',status:'all'},rev:{},desk:null};
+try{const v=localStorage.getItem('bids.view');if(['calls','mine','archive','desk'].includes(v))S.view=v;}catch(e){}
+const remember=()=>{try{if(['calls','mine','archive','desk'].includes(S.view))localStorage.setItem('bids.view',S.view);}catch(e){}};
+
+const callById=id=>S.calls.find(c=>c.id===id);
+const bidById=id=>S.bids.find(b=>b.id===id);
+/* FORK link: an accepted bid becomes a FORK event. FORK records the event id on the bid's decision. */
+function forkActs(b,s,d){if(s!=='accepted')return '';
+  const eid=b.forkEventId||(d&&d.forkEventId), mine=S.officer||(S.me&&b.owner===S.me)||manages(bidCall(b));
+  if(eid)return mine?`<a class="btn sm" href="/crat/${encodeURIComponent(eid)}">Open the event in FORK</a>`:`<a class="btn sm" href="/e/${encodeURIComponent(eid)}">Event page</a>`;
+  return mine?`<a class="btn sm" href="/crat?fromBid=${encodeURIComponent(b.id)}">Start this event in FORK</a>`:'';}
+let deepBid=null,deepCall=null;try{const q=new URLSearchParams(location.search);deepBid=q.get('bid');deepCall=q.get('call');}catch(e){}
+function bidStatus(b){if(b.status==='withdrawn')return 'withdrawn';if(b.status==='draft')return 'draft';return S.dec[b.id]?.status||b.status||'submitted';}
+function callStatus(c){return c.status||'open';}
+const canEditBid=b=>S.officer||!b.owner||b.owner===S.me;
+/* Anyone signed in can post a call for bids; its poster (or a kingdom officer) runs the comparison and award. */
+const manages=c=>!!c&&(S.officer||(!!S.me&&c.owner===S.me));
+const myCalls=()=>S.calls.filter(c=>S.me&&c.owner===S.me);
+const canDesk=()=>S.officer||myCalls().length>0;
+const bidCall=b=>b&&b.callId?callById(b.callId):null;
+const bidsFor=cid=>S.bids.filter(b=>b.callId===cid&&bidStatus(b)!=='draft');
+const stPill=(s,map)=>`<span class="st ${s}">${esc(map[s]||s)}</span>`;
+const exMark=o=>o.example?' <span class="ex">Example</span>':'';
+
+function budget(b){
+  const c=b.cost||{}, exp=num(b.attendance?.expected), fc=num(c.feastCount);
+  const gate=exp*num(c.gatePre), feastIn=fc*num(c.feastFee);
+  const out=num(c.siteRental)+num(c.insurance)+fc*num(c.feastCostPer)+num(c.other);
+  const net=gate+feastIn-out;
+  const per=num(c.gatePre)+(exp?(fc/exp)*(num(c.feastFee)-num(c.feastCostPer)):0);
+  const fixed=num(c.siteRental)+num(c.insurance)+num(c.other);
+  const be=per>0?Math.ceil(fixed/per):null;
+  return {gate,feastIn,out,net,be,exp};
+}
+
+let toastT;
+function toast(m){const el=$('#toast');el.textContent=m;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,2800);}
+async function w(fn,ok){
+  if(!S.db){toast('Bid records aren’t connected yet. Check firebase-config.js.');return false;}
+  try{await fn();if(ok)toast(ok);return true;}catch(e){console.error(e);const c=e&&e.code;
+    toast((c==='invalid_argument'||c==='permission-denied')?'You don’t have permission for that. Sign in first. Kingdom officer actions need an officer account.':c==='quota_exceeded'?'Storage is full. Remove old example records to make room.':'Couldn’t save. Check your connection and try again.');return false;}
+}
+function arm(key){if(S.confirm===key){S.confirm=null;return true;}S.confirm=key;render();setTimeout(()=>{if(S.confirm===key){S.confirm=null;render();}},4000);return false;}
+function go(v,sel){if(S.view==='build'&&$('#bForm')&&S.draft)collect();if(S.view!=='bid'&&S.view!=='call')S.prev=S.view;S.view=v;S.sel=sel??null;remember();render();window.scrollTo(0,0);}
+
+/* ---------- render ---------- */
+function render(){
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.view||(S.view==='bid'&&b.dataset.v===S.prev)||(S.view==='call'&&b.dataset.v==='calls')));
+  const role=$('#role');role.classList.toggle('officer',S.officer);
+  $('#roleTxt').textContent=S.offline?'Offline preview':S.officer?'Kingdom officer':myCalls().length?'Event host':'Player';
+  const mine=S.bids.filter(b=>S.me&&b.owner===S.me&&b.status==='draft').length;
+  $('#mineCount').hidden=!mine;$('#mineCount').textContent=mine;
+  $('#notice').innerHTML=S.offline?'<div class="banner">Bid records aren’t connected yet, so nothing you enter will be saved. Add your Firebase settings to firebase-config.js and redeploy.</div>':'';
+  $('#savebar').hidden=S.view!=='build';
+  const v=$('#view');
+  if(!S.ready&&!S.offline){v.innerHTML='<p class="empty">Opening the Herald’s Call…</p>';return;}
+  $('#deskTab').hidden=!canDesk();
+  if(S.view==='desk'&&!canDesk()){S.view='calls';}
+  ({calls:renderCalls,build:renderBuild,mine:renderMine,archive:renderArchive,bid:renderBid,call:renderCall,desk:renderDesk})[S.view]();
+}
+
+/* ----- calls ----- */
+function renderCalls(){
+  const counts={all:S.calls.length};CATS.forEach(c=>counts[c.k]=S.calls.filter(x=>x.category===c.k).length);
+  const ord={open:0,review:1,awarded:2,closed:3};
+  const list=S.calls.filter(c=>S.catF==='all'||c.category===S.catF)
+    .sort((a,b)=>ord[callStatus(a)]-ord[callStatus(b)]||(callStatus(a)==='open'?(a.deadline||'').localeCompare(b.deadline||''):(b.windowStart||'').localeCompare(a.windowStart||'')));
+  const chips=`<div class="chips"><button class="chip ${S.catF==='all'?'on':''}" data-act="catF" data-v="all">All <small>${counts.all}</small></button>${CATS.map(c=>`<button class="chip ${S.catF===c.k?'on':''}" data-act="catF" data-v="${c.k}"><span class="cat" style="${cc(c.k)}"></span>${c.n} <small>${counts[c.k]}</small></button>`).join('')}</div>`;
+  const cards=list.map(c=>{const st=callStatus(c),n=bidsFor(c.id).length,dl=daysTo(c.deadline);
+    const due=st==='open'&&c.deadline?(dl<0?'<span class="due soon">Deadline passed</span>':`<span class="due ${dl<=14?'soon':''}">${dl===0?'Due today':dl+' day'+(dl===1?'':'s')+' left'}</span> · ${fDate(c.deadline)}`):(c.deadline?fDate(c.deadline):'—');
+    const aw=c.awardedBid&&bidById(c.awardedBid);
+    return `<article class="panel ccard" style="${cc(c.category)}">
+      <div class="row between" style="align-items:center">${catMark(c.category)}${stPill(st,CALL_ST)}</div>
+      <h3>${esc(c.title)}${exMark(c)}</h3>
+      <dl class="meta"><dt>Called by</dt><dd>${c.park?esc(c.park)+' · ':''}${esc(c.kingdom)}${c.term?' · '+esc(c.term):''}</dd>
+        <dt>Event window</dt><dd>${fRange(c.windowStart,c.windowEnd)}</dd>
+        <dt>Bids due</dt><dd>${due}</dd>
+        <dt>Bids in</dt><dd class="num">${n}</dd>
+        ${aw?`<dt>Awarded</dt><dd>${esc(aw.eventName)}</dd>`:''}</dl>
+      <div class="acts"><button class="btn ghost sm" data-act="openCall" data-id="${c.id}">View call${n?' and compare bids':''}</button>
+        ${st==='open'?`<button class="btn seal sm" data-act="bidOn" data-id="${c.id}">Build a bid</button>`:''}</div></article>`;}).join('');
+  $('#view').innerHTML=`${S.me||S.officer?`<div class="row between" style="margin-bottom:14px"><p class="muted" style="margin:0">Post an event your park or kingdom needs hosted. Autocrats build bids against each call.</p><button class="btn" data-act="newCall">Post a call for bids</button></div><div id="callForm"></div>`:''}
+    <div class="panel" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px"><div style="max-width:62ch"><b>Hosting a kingdom-level event?</b> <span class="muted">Parks, households, companies and guilds bid to run events like Feast of the Gods, Feast of Fools and Feast of the Dead. No posted call needed. Your bid goes to the monarchy for approval.</span></div><button class="btn ghost" data-act="newBid">Start an event bid</button></div>
+    ${chips}${list.length?`<div class="cgrid">${cards}</div>`:`<div class="empty"><h2>No calls for bids yet</h2><p>${S.me||S.officer?'Post the first one above.':'When your kingdom posts an event it needs hosted, it shows up here.'} You can still build an independent special-event bid from the Build a Bid tab.</p></div>`}`;
+  if(S.callEdit!==undefined) renderCallForm();
+}
+function renderCallForm(){
+  const el=$('#callForm');if(!el)return;const c=S.callEdit?callById(S.callEdit)||{}:{kingdom:'Westmarch',category:'midreign'};
+  el.innerHTML=`<form id="cForm" class="panel" style="margin-bottom:18px"><h2>${S.callEdit?'Edit call for bids':'New call for bids'}</h2><div class="stack">
+    <div class="catpick">${CATS.map(k=>`<label style="${cc(k.k)}"><input type="radio" name="cCat" value="${k.k}" ${c.category===k.k?'checked':''}><span><b>${k.n}</b><small>${k.d}</small></span></label>`).join('')}</div>
+    <div class="row"><div class="field" style="flex-basis:280px"><label for="cTitle">Event</label><input id="cTitle" required value="${esc(c.title)}" placeholder="Spring Coronation 2027"></div>
+      <div class="field"><label for="cKingdom">Kingdom</label><input id="cKingdom" list="kingdoms" required value="${esc(c.kingdom)}"></div>
+      <div class="field"><label for="cPark">Park calling for bids</label><input id="cPark" list="parks" value="${esc(c.park)}" placeholder="Leave blank for a kingdom call"></div>
+      <div class="field"><label for="cTerm">Reign</label><input id="cTerm" value="${esc(c.term)}" placeholder="Spring 2027 reign"></div></div>
+    <div class="row"><div class="field"><label for="cWs">Event window opens</label><input id="cWs" type="date" value="${esc(c.windowStart)}"></div>
+      <div class="field"><label for="cWe">Event window closes</label><input id="cWe" type="date" value="${esc(c.windowEnd)}"></div>
+      <div class="field"><label for="cDl">Bids due</label><input id="cDl" type="date" required value="${esc(c.deadline)}"></div>
+      <div class="field xs"><label for="cMin">Min. capacity</label><input id="cMin" type="number" min="0" value="${esc(c.minCapacity)}"></div></div>
+    <div class="field wide"><label for="cReq">What bids must cover</label><textarea id="cReq" rows="4" placeholder="Camping for 150+, a hall or pavilion for court, feast required, bids presented at Althing">${esc(c.requirements)}</textarea></div>
+    ${S.callEdit?`<div class="field xs"><label for="cSt">Status</label><select id="cSt">${Object.entries(CALL_ST).map(([k,n])=>`<option value="${k}" ${callStatus(c)===k?'selected':''}>${n}</option>`).join('')}</select></div>`:''}
+    <div class="acts"><button class="btn" type="submit">${S.callEdit?'Save changes':'Post call'}</button><button class="btn ghost" type="button" data-act="cancelCall">Cancel</button></div></div></form>`;
+}
+
+/* ----- call detail + compare ----- */
+function renderCall(){
+  const c=callById(S.sel);if(!c){go('calls');return;}
+  const st=callStatus(c),bids=bidsFor(c.id).sort((a,b)=>(a.submittedAt||0)-(b.submittedAt||0));
+  const rows=[
+    ['Status',b=>stPill(bidStatus(b),BID_ST)],
+    ['Hosted by',b=>hostLabel(b)||'—'],
+    ['Theme',b=>esc(b.theme)||'—'],
+    ['Dates',b=>fRange(b.start,b.end)],
+    ['Site',b=>`${esc(b.site?.name)||'—'}<small>${esc(b.site?.location)}</small>`],
+    ['Site booking',b=>esc(RESERVE[b.site?.reserve]||'—')],
+    ['Capacity',b=>b.site?.capacity?`<span class="num">${esc(b.site.capacity)}</span>`:'—'],
+    ['Camping',b=>{const a=b.site?.amen||[];return a.length?AMEN.filter(x=>a.includes(x[0])).map(x=>x[1]).join(', '):'—';}],
+    ['Autocrat',b=>esc((b.crats||[]).find(x=>x.role==='Autocrat')?.name)||'—'],
+    ['Expected',b=>`<span class="num">${num(b.attendance?.expected)||'—'}</span>`],
+    ['Gate (pre-reg)',b=>b.cost?.gatePre!==undefined&&b.cost?.gatePre!==''?money(num(b.cost.gatePre)):'—'],
+    ['Feast',b=>b.feast?.offered?`${feastStyle(b)} · ${num(b.cost?.feastFee)?money(num(b.cost.feastFee)):'Included'}<small>${esc(b.feast?.meals||'')}</small>`:'No feast'],
+    ['A&S',b=>esc(optName(AS_OPT,b.extras?.as))],
+    ['Tournament',b=>esc(optName(FIGHT_OPT,b.extras?.fight))],
+    ['Battlegames',b=>{const g=bgSorted(b);return g.length?g.map(x=>`${esc(x.theme||'Battlegame')}<small>${bgWhen(x)}</small>`).join(''):'—';}],
+    ['Projected net',b=>{const x=budget(b);return `<b class="num" style="color:var(--${x.net<0?'warn':'good'})">${money(x.net)}</b>${x.be?`<small>Breaks even at ${x.be}</small>`:''}`;}],
+  ];
+  const cmp=bids.length?`<div class="scroll"><table class="cmp"><thead><tr><th></th>${bids.map(b=>`<td><button class="linkish" data-act="openBid" data-id="${b.id}">${esc(b.eventName)}</button>${exMark(b)}<small>${esc(b.submitter?.persona)}</small></td>`).join('')}</tr></thead><tbody>
+    ${rows.map(([l,f])=>`<tr><th>${l}</th>${bids.map(b=>`<td>${f(b)}</td>`).join('')}</tr>`).join('')}
+    ${manages(c)&&st!=='closed'?`<tr><th>Decision</th>${bids.map(b=>{const s=bidStatus(b);return `<td>${s==='accepted'?'<b style="color:var(--good)">Awarded</b>':s==='withdrawn'?'<span class="muted">Withdrawn</span>':`<button class="btn seal sm ${S.confirm==='award'+b.id?'armed':''}" data-act="award" data-id="${b.id}">${S.confirm==='award'+b.id?'Tap again to award':'Award this bid'}</button>`}</td>`;}).join('')}</tr>`:''}
+    </tbody></table></div>`:'<p class="none">No bids submitted yet.</p>';
+  $('#view').innerHTML=`<button class="btn ghost sm back" data-act="tab" data-v="calls">← All calls</button>
+    <div class="stack"><div class="panel" style="border-top:5px solid var(--cc);${cc(c.category)}">
+      <div class="row between" style="align-items:center;margin-bottom:8px">${catMark(c.category)}${stPill(st,CALL_ST)}</div>
+      <h2 style="font-size:1.8rem">${esc(c.title)}${exMark(c)}</h2>
+      <dl class="meta" style="margin-top:12px"><dt>Called by</dt><dd>${c.park?esc(c.park)+' · ':''}${esc(c.kingdom)}${c.term?' · '+esc(c.term):''}</dd>
+        <dt>Event window</dt><dd>${fRange(c.windowStart,c.windowEnd)}</dd><dt>Bids due</dt><dd>${c.deadline?fDate(c.deadline):'—'}</dd>
+        ${c.minCapacity?`<dt>Min. capacity</dt><dd class="num">${esc(c.minCapacity)}</dd>`:''}</dl>
+      ${c.requirements?`<h3 style="margin:16px 0 6px;font-size:1.05rem">What bids must cover</h3><p class="prose">${esc(c.requirements)}</p>`:''}
+      <div class="acts" style="margin-top:14px">${st==='open'?`<button class="btn seal" data-act="bidOn" data-id="${c.id}">Build a bid for this event</button>`:''}
+        ${manages(c)?`<button class="btn ghost" data-act="editCall" data-id="${c.id}">Edit call</button>${st==='open'?`<button class="btn ghost" data-act="callSt" data-id="${c.id}" data-v="review">Close bidding</button>`:''}<button class="btn danger ${S.confirm==='delC'+c.id?'armed':''}" data-act="delCall" data-id="${c.id}">${S.confirm==='delC'+c.id?'Tap again to delete':'Delete call'}</button>`:''}</div></div>
+      <div class="panel"><h2>Bids side by side <span class="muted" style="font-family:var(--body);font-weight:500;font-size:1rem">${bids.length} submitted</span></h2>${cmp}
+      ${manages(c)&&bids.length?'<p class="foot">Awarding a bid marks it accepted, declines the other open bids, and moves the call to Awarded.</p>':''}</div></div>`;
+}
+
+/* ----- builder ----- */
+function blankBid(callId){
+  const c=callId&&callById(callId);
+  return {callId:c?c.id:'',category:c?c.category:'special',kingdom:c?c.kingdom:'Westmarch',eventName:c?c.title:'',theme:'',themeDesc:'',hostType:'park',hostPark:c&&c.park?c.park:'',callPark:c&&c.park?c.park:'',
+    start:'',end:'',site:{name:'',location:'',url:'',reserve:'none',capacity:'',acres:'',amen:['tent'],notes:''},
+    crats:CRAT_ROLES.slice(0,5).map(r=>({role:r,name:''})),attendance:{expected:'',lastYear:''},
+    cost:{gatePre:'',gateDoor:'',youth:'',feastCount:'',feastFee:'',siteRental:'',insurance:'',feastCostPer:'',other:''},
+    feast:{offered:true,potluck:false,meals:'Saturday feast',menu:'',diet:[]},program:{acts:[],schedule:''},notes:'',
+    extras:{as:'none',fight:'none',battlegames:[]},
+    submitter:{persona:'',park:'',contact:''},status:'draft'};
+}
+function startBid(callId){S.draft=blankBid(callId);S.editId=null;S.bad=new Set();go('build');}
+const F=(id,label,val,opts={})=>`<div class="field ${opts.cls||''} ${S.bad.has(id)?'bad':''}"><label for="${id}">${label}${opts.req?' *':''}</label>${opts.money?'<div class="money">':''}<input id="${id}" data-k="${id}" ${opts.type?`type="${opts.type}"`:''} ${opts.type==='number'?'min="0" step="any" inputmode="decimal"':''} ${opts.list?`list="${opts.list}"`:''} value="${esc(val)}" placeholder="${esc(opts.ph||'')}">${opts.money?'</div>':''}${opts.hint?`<span class="hint">${opts.hint}</span>`:''}</div>`;
+const TA=(id,label,val,ph,rows=4)=>`<div class="field wide"><label for="${id}">${label}</label><textarea id="${id}" data-k="${id}" rows="${rows}" placeholder="${esc(ph)}">${esc(val)}</textarea></div>`;
+const RD=(name,list,cur)=>`<div class="checks">${list.map(([k,n])=>`<label><input type="radio" name="${name}" value="${k}" ${cur===k?'checked':''}>${n}</label>`).join('')}</div>`;
+const CK=(name,list,sel)=>`<div class="checks">${list.map(([k,n])=>`<label><input type="checkbox" name="${name}" value="${k}" ${sel.includes(k)?'checked':''}>${n}</label>`).join('')}</div>`;
+function renderBuild(){
+  if(!S.draft){S.draft=blankBid('');}
+  const b=S.draft, openCalls=S.calls.filter(c=>callStatus(c)==='open'), c=b.callId&&callById(b.callId);
+  const callOpts=`<option value="">Independent bid (no posted call)</option>`+openCalls.map(x=>`<option value="${x.id}" ${x.id===b.callId?'selected':''}>${esc(x.title)} · ${esc(x.kingdom)}</option>`).join('')+(c&&callStatus(c)!=='open'?`<option value="${c.id}" selected>${esc(c.title)} (bidding closed)</option>`:'');
+  $('#view').innerHTML=`<div class="bgrid"><form id="bForm" class="stack" novalidate>
+    <datalist id="eventNames">${[...new Set([...KINGDOM_EVENTS,...S.bids.filter(x=>x.category==='special'&&bidStatus(x)!=='draft').map(x=>x.eventName)].filter(Boolean))].map(n=>`<option value="${esc(n)}"></option>`).join('')}</datalist>
+    <div class="panel sec"><h2><span class="n">1</span>What you’re bidding on</h2>
+      <div class="field wide"><label for="callId">Call for bids</label><select id="callId">${callOpts}</select>${!c?'<span class="hint">Hosting a kingdom-level event your group runs, like Feast of the Gods or Feast of Fools? Keep this on Independent bid and pick Special Event. It still goes to the monarchy for approval.</span>':''}</div>
+      ${c?`<div class="forcall"><b>${esc(c.title)}</b> · ${esc(c.kingdom)}<br>Window ${fRange(c.windowStart,c.windowEnd)} · Bids due ${fDate(c.deadline)||'—'}${c.minCapacity?` · Min. capacity ${esc(c.minCapacity)}`:''}${c.requirements?`<p class="prose muted" style="margin:6px 0 0">${esc(c.requirements)}</p>`:''}</div>`:''}
+      <div class="catpick">${CATS.map(k=>`<label style="${cc(k.k)}"><input type="radio" name="category" value="${k.k}" ${b.category===k.k?'checked':''} ${c?'disabled':''}><span><b>${k.n}</b><small>${k.d}</small></span></label>`).join('')}</div>
+      <div class="row">${F('eventName','Event name',b.eventName,{req:1,ph:'Feast of the Gods 2027',list:'eventNames'})}${F('kingdom','Kingdom',b.kingdom,{req:1,list:'kingdoms'})}<div class="field xs" style="flex-basis:150px"><label for="hostType">Hosted by a</label><select id="hostType" data-k="hostType">${HOST_TYPES.map(([k,n])=>`<option value="${k}" ${(b.hostType||'park')===k?'selected':''}>${n}</option>`).join('')}</select></div>${F('hostPark','Hosting group',b.hostPark,{list:'parks',ph:'Siar Geata, House Ravenmoor…'})}</div>
+      <div class="row">${F('theme','Theme',b.theme,{ph:'A Night in the Ember Court'})}</div>
+      ${TA('themeDesc','Theme pitch',b.themeDesc,'How the theme shows up: decorations, garb encouraged, quest storyline, feast styling',3)}</div>
+
+    <div class="panel sec"><h2><span class="n">2</span>Dates and site</h2>
+      <div class="row">${F('start','Arrive / start',b.start,{type:'date',req:1})}${F('end','Depart / end',b.end,{type:'date',req:1})}</div>
+      <div class="row">${F('site.name','Site name',b.site.name,{req:1,ph:'Pine Hollow Group Camp'})}${F('site.location','Location',b.site.location,{ph:'City, State'})}${F('site.url','Site link',b.site.url,{ph:'https://…'})}</div>
+      <div class="row"><div class="field"><label for="site.reserve2">Booking status</label><select id="site.reserve2" data-k="site.reserve">${Object.entries(RESERVE).map(([k,n])=>`<option value="${k}" ${b.site.reserve===k?'selected':''}>${n}</option>`).join('')}</select></div>
+        ${F('site.capacity','Site capacity',b.site.capacity,{type:'number',ph:'200'})}${F('site.acres','Acres / field space',b.site.acres,{ph:'40 acres, 3 open fields'})}</div>
+      <div><div class="lbl" style="margin-bottom:6px">Camping and amenities</div>${CK('amen',AMEN,b.site.amen||[])}</div>
+      ${TA('site.notes','Site availability and notes',b.site.notes,'Which dates the site holds, backup weekends, parking, fire restrictions, quiet hours',3)}</div>
+
+    <div class="panel sec"><h2><span class="n">3</span>Crats</h2>
+      <div class="stack" style="gap:8px" id="crats">${(b.crats||[]).map((x,i)=>`<div class="crat"><input aria-label="Role" data-crat="role" data-i="${i}" value="${esc(x.role)}" placeholder="Role"><input aria-label="Persona name" data-crat="name" data-i="${i}" value="${esc(x.name)}" placeholder="Persona name${x.role==='Autocrat'?' (required)':''}" ${x.role==='Autocrat'&&S.bad.has('autocrat')?'style="border-color:var(--warn)"':''}><button type="button" class="xbtn" data-act="rmCrat" data-i="${i}" aria-label="Remove ${esc(x.role)}">×</button></div>`).join('')}</div>
+      <div class="acts"><button type="button" class="btn ghost sm" data-act="addCrat">Add a crat</button>${CRAT_ROLES.filter(r=>!(b.crats||[]).some(x=>x.role===r)).map(r=>`<button type="button" class="btn ghost sm" data-act="addCrat" data-v="${esc(r)}">+ ${esc(r)}</button>`).join('')}</div></div>
+
+    <div class="panel sec"><h2><span class="n">4</span>Attendance and cost</h2>
+      <div class="row">${F('attendance.expected','Expected attendance',b.attendance.expected,{type:'number',req:1,ph:'150'})}${F('attendance.lastYear','Last time this event ran',b.attendance.lastYear,{type:'number',ph:'132',hint:'Attendance, if known'})}</div>
+      <div class="row">${F('cost.gatePre','Gate, pre-registered',b.cost.gatePre,{type:'number',money:1,req:1,ph:'25'})}${F('cost.gateDoor','Gate, at the door',b.cost.gateDoor,{type:'number',money:1,ph:'30'})}${F('cost.youth','Youth gate',b.cost.youth,{type:'number',money:1,ph:'10'})}</div>
+      <div class="row">${F('cost.siteRental','Site rental',b.cost.siteRental,{type:'number',money:1,ph:'1800'})}${F('cost.insurance','Insurance',b.cost.insurance,{type:'number',money:1,ph:'150'})}${F('cost.other','Other costs',b.cost.other,{type:'number',money:1,ph:'300',hint:'Porta-johns, ice, prizes, décor'})}</div></div>
+
+    <div class="panel sec"><h2><span class="n">5</span>Event features <span class="muted" style="font-family:var(--body);font-size:.95rem;font-weight:500">optional</span></h2>
+      <div class="row" style="align-items:flex-start">
+        <div class="opt" style="flex:1 1 260px"><div class="lbl">Arts & Sciences</div>${RD('x.as',AS_OPT,b.extras?.as||'none')}</div>
+        <div class="opt" style="flex:1 1 260px"><div class="lbl">Fighting tournament</div>${RD('x.fight',FIGHT_OPT,b.extras?.fight||'none')}</div></div>
+      <div class="row" style="align-items:flex-start">
+        <div class="opt" style="flex:1 1 260px"><div class="lbl">Feast</div>${RD('x.feast',[['yes','Yes'],['no','No']],b.feast?.offered?'yes':'no')}</div>
+        <div class="opt" style="flex:1 1 260px"><div class="lbl">Potluck style</div>${RD('x.potluck',[['yes','Potluck'],['no','Not potluck']],b.feast?.potluck?'yes':'no')}</div></div>
+      <div class="opt"><div class="lbl">Themed battlegames</div>
+        <div class="stack" style="gap:8px" id="bgs">${(b.extras?.battlegames||[]).map((g,i)=>`<div class="bgrow"><input aria-label="Battlegame theme" data-bg="theme" data-i="${i}" value="${esc(g.theme)}" placeholder="Siege of the Ember Keep"><input type="date" aria-label="Day" data-bg="date" data-i="${i}" value="${esc(g.date)}" ${b.start?`min="${esc(b.start)}"`:''} ${b.end?`max="${esc(b.end)}"`:''}><input type="time" aria-label="Start time" data-bg="start" data-i="${i}" value="${esc(g.start)}"><input type="time" aria-label="End time" data-bg="end" data-i="${i}" value="${esc(g.end)}"><button type="button" class="xbtn" data-act="rmBg" data-i="${i}" aria-label="Remove battlegame">×</button></div>`).join('')}</div>
+        <div class="acts" style="margin-top:4px"><button type="button" class="btn ghost sm" data-act="addBg">Add a battlegame</button><span class="muted" style="font-size:.84rem">Theme, day, start and end time</span></div></div></div>
+
+    <div class="panel sec"><h2><span class="n">6</span>Feast details</h2>
+      ${b.feast?.offered?'':'<p class="none" style="margin:0">No feast is set under Event features. Switch Feast to Yes to fill this in.</p>'}
+      <div class="row">${F('feast.meals','Meals served',b.feast.meals,{ph:'Saturday feast, Sunday breakfast'})}${F('cost.feastCount','Expected feast seats',b.cost.feastCount,{type:'number',ph:'90'})}${F('cost.feastFee','Feast price',b.cost.feastFee,{type:'number',money:1,ph:'12'})}${F('cost.feastCostPer','Food cost per seat',b.cost.feastCostPer,{type:'number',money:1,ph:'8'})}</div>
+      ${TA('feast.menu','Menu',b.feast.menu,'Roast chicken, herbed potatoes, honey carrots, bread and butter, apple crumble',3)}
+      <div><div class="lbl" style="margin-bottom:6px">Dietary accommodations</div>${CK('diet',DIET,b.feast.diet||[])}</div></div>
+
+    <div class="panel sec"><h2><span class="n">7</span>Program</h2>
+      <div><div class="lbl" style="margin-bottom:6px">Planned activities</div>${CK('acts',ACTS,b.program.acts||[])}</div>
+      ${TA('program.schedule','Schedule highlights',b.program.schedule,'Fri: gate opens 4pm, night quest. Sat: court 10am, tournaments, feast 6pm. Sun: battlegames, site clean-up',4)}
+      ${TA('notes','Anything else the kingdom should know',b.notes,'Volunteers lined up, past events run, contingency plans',3)}</div>
+
+    <div class="panel sec"><h2><span class="n">8</span>Submitted by</h2>
+      <div class="row">${F('submitter.persona','Your persona',b.submitter.persona,{req:1,ph:'Dame Isolde of Ashen Grove'})}${F('submitter.park','Your park',b.submitter.park,{list:'parks'})}${F('submitter.contact','Contact',b.submitter.contact,{ph:'Email, Discord or ORK profile'})}</div></div>
+  </form>
+  <aside class="side"><div class="panel"><h2 style="font-size:1.15rem">Budget at a glance</h2><div id="ledger" class="ledger"></div></div>
+    <div class="panel"><h2 style="font-size:1.15rem">Checklist</h2><div id="check" class="ledger"></div></div></aside></div>`;
+  $('#savebar').innerHTML=`<div class="in"><span class="muted">${S.editId?(b.status==='draft'?'Editing a draft':'Editing a submitted bid'):'New bid'}${b.eventName?' · <b style="color:var(--ink)">'+esc(b.eventName)+'</b>':''}</span>
+    <div class="acts"><button class="btn ghost" data-act="cancelBuild">Discard</button><button class="btn ghost" data-act="saveBid" data-v="draft">${b.status==='draft'?'Save draft':'Save'}</button>${b.status==='draft'?'<button class="btn seal" data-act="saveBid" data-v="submitted">Submit bid</button>':''}</div></div>`;
+  updateSide();
+}
+function normalize(n){const d=blankBid('');for(const k of Object.keys(d)){if(n[k]===undefined)n[k]=d[k];else if(d[k]&&typeof d[k]==='object'&&!Array.isArray(d[k]))n[k]=Object.assign({},d[k],n[k]);}return n;}
+function setPath(o,p,v){const k=p.split('.');let x=o;for(let i=0;i<k.length-1;i++)x=x[k[i]]||(x[k[i]]={});x[k.at(-1)]=v;}
+function getPath(o,p){return p.split('.').reduce((x,k)=>x?.[k],o);}
+function collect(){
+  const b=S.draft;if(!b||!$('#bForm'))return b;
+  document.querySelectorAll('#bForm [data-k]').forEach(el=>setPath(b,el.dataset.k,el.value.trim()));
+  const cat=document.querySelector('#bForm input[name=category]:checked');if(cat&&!cat.disabled)b.category=cat.value;
+  b.callId=$('#callId').value;
+  const grp=n=>[...document.querySelectorAll(`#bForm input[name=${n}]:checked`)].map(x=>x.value);
+  b.site.amen=grp('amen');b.feast.diet=grp('diet');b.program.acts=grp('acts');
+  const rv=n=>document.querySelector(`#bForm input[name="${n}"]:checked`)?.value;
+  b.extras=b.extras||{};b.extras.as=rv('x.as')||'none';b.extras.fight=rv('x.fight')||'none';
+  b.feast.offered=rv('x.feast')!=='no';b.feast.potluck=rv('x.potluck')==='yes';
+  const bg=[];document.querySelectorAll('#bgs [data-bg]').forEach(el=>{const i=+el.dataset.i;(bg[i]||(bg[i]={}))[el.dataset.bg]=el.value.trim();});
+  b.extras.battlegames=bg.filter(Boolean);
+  const cr=[];document.querySelectorAll('#crats [data-crat=role]').forEach(el=>{const i=el.dataset.i;cr[i]={role:el.value.trim(),name:document.querySelector(`#crats [data-crat=name][data-i="${i}"]`).value.trim()};});
+  b.crats=cr.filter(Boolean);
+  return b;
+}
+function checks(b){
+  const c=b.callId&&callById(b.callId), exp=num(b.attendance?.expected);
+  return [
+    ['Event name and kingdom',!!(b.eventName&&b.kingdom)],
+    ['Dates set',!!(b.start&&b.end&&b.end>=b.start)],
+    ['Dates inside the call’s window',!c||!c.windowStart||!b.start?null:(b.start>=c.windowStart&&(!c.windowEnd||b.end<=c.windowEnd))],
+    ['Site named',!!b.site?.name],
+    ['Site booked or on hold',['hold','confirmed'].includes(b.site?.reserve)],
+    ['Capacity covers expected attendance',!num(b.site?.capacity)||!exp?null:num(b.site.capacity)>=exp],
+    ['Meets the call’s minimum capacity',!c||!num(c.minCapacity)?null:num(b.site?.capacity)>=num(c.minCapacity)],
+    ['Autocrat named',!!(b.crats||[]).find(x=>x.role==='Autocrat'&&x.name)],
+    ['Feastocrat named',!b.feast?.offered?null:!!(b.crats||[]).find(x=>/feast/i.test(x.role)&&x.name)],
+    ['Gate price set',b.cost?.gatePre!==''&&b.cost?.gatePre!==undefined],
+    ['Budget breaks even',!exp?null:budget(b).net>=0]].filter(x=>x[1]!==null);
+}
+function updateSide(){
+  const b=collect();if(!b||!$('#ledger'))return;const x=budget(b);
+  $('#ledger').innerHTML=`<div class="l"><span>Gate (${x.exp||0} × ${money(num(b.cost.gatePre))})</span><span>${money(x.gate)}</span></div>
+    <div class="l"><span>Feast seats sold</span><span>${money(x.feastIn)}</span></div>
+    <div class="l"><span>Site, insurance, food, other</span><span class="neg">${money(-x.out)}</span></div>
+    <div class="l tot"><span>Projected net</span><span class="${x.net<0?'neg':'pos'}">${money(x.net)}</span></div>
+    <p class="foot" style="margin:4px 0 0">${x.be?`Breaks even at <b>${x.be}</b> paid attendees.`:'Add a gate price to see the break-even point.'} Uses the pre-registration gate for everyone.</p>`;
+  $('#check').innerHTML=checks(b).map(([l,ok])=>`<div class="l"><span>${l}</span><b style="color:var(--${ok?'good':'warn'})">${ok?'✓':'—'}</b></div>`).join('');
+}
+async function saveBid(target){
+  const b=collect();S.bad=new Set();
+  if(target==='submitted'){
+    ['eventName','kingdom','start','end','site.name','attendance.expected','cost.gatePre','submitter.persona'].forEach(k=>{if(!String(getPath(b,k)??'').trim())S.bad.add(k);});
+    if(!(b.crats||[]).find(x=>x.role==='Autocrat'&&x.name))S.bad.add('autocrat');
+    if(S.bad.size){renderBuild();toast('Fill in the starred fields and name an Autocrat before submitting.');const f=document.querySelector('.bad input,.bad select');f&&f.focus();return;}
+    const c=b.callId&&callById(b.callId);if(c&&callStatus(c)!=='open'){toast('Bidding on this call has closed. Save it as a draft or pick another call.');return;}
+  }else if(!b.eventName){S.bad.add('eventName');renderBuild();toast('Give the bid a name before saving.');return;}
+  if(target==='submitted'){b.status='submitted';b.submittedAt=Date.now();}
+  if(b.callId){const c=callById(b.callId);if(c)b.category=c.category;}
+  b.updatedAt=Date.now();
+  const data=JSON.parse(JSON.stringify(b));delete data.id;
+  if(!S.editId){data.createdAt=Date.now();if(S.me)data.owner=S.me;}
+  const ok=await w(async()=>{if(S.editId)await S.db.doc('bids/'+S.editId).set(data);else{const r=await S.db.collection('bids').add(data);S.editId=r.id;}},target==='submitted'?'Bid submitted to '+(b.kingdom||'the kingdom')+'.':'Saved.');
+  if(ok){const id=S.editId;S.draft=null;S.editId=null;go('bid',id);}
+}
+
+/* ----- my bids ----- */
+function renderMine(){
+  const mine=S.bids.filter(b=>S.me?b.owner===S.me:false).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  $('#view').innerHTML=`<div class="row between" style="margin-bottom:14px"><p class="muted" style="margin:0;max-width:60ch">Drafts stay on this list until you submit them. Submitted bids appear on their call and in the archive.</p><button class="btn seal" data-act="newBid">Start a new bid</button></div>
+    ${mine.length?`<div class="panel"><div class="scroll"><table><thead><tr><th>Bid</th><th>For</th><th>Dates</th><th>Status</th><th></th></tr></thead><tbody>
+    ${mine.map(b=>{const c=callById(b.callId),s=bidStatus(b);return `<tr><td><button class="linkish" data-act="openBid" data-id="${b.id}">${esc(b.eventName||'Untitled bid')}</button><small>${catMark(b.category)}</small></td>
+      <td>${c?esc(c.title):'<span class="muted">Independent</span>'}<small>${esc(b.kingdom)}</small></td><td>${fRange(b.start,b.end)}</td><td>${stPill(s,BID_ST)}</td>
+      <td><div class="acts">${canEditBid(b)&&['draft','submitted'].includes(s)?`<button class="btn ghost sm" data-act="editBid" data-id="${b.id}">Edit</button>`:''}${s==='draft'?`<button class="btn danger sm ${S.confirm==='delB'+b.id?'armed':''}" data-act="delBid" data-id="${b.id}">${S.confirm==='delB'+b.id?'Tap again':'Delete'}</button>`:''}</div></td></tr>`;}).join('')}
+    </tbody></table></div></div>`:`<div class="empty"><h2>${S.me?'You haven’t started a bid':'Sign in to see your bids'}</h2><p>${S.me?'':'Use Sign in with Google at the top of the page. '}Pick an open call on the Calls for Bids tab, or start an independent special-event bid.</p></div>`}`;
+}
+
+/* ----- archive ----- */
+function renderArchive(){
+  const A=S.arch, all=S.bids.filter(b=>bidStatus(b)!=='draft');
+  const kingdoms=[...new Set(all.map(b=>b.kingdom).filter(Boolean))].sort();
+  const years=[...new Set(all.map(yearOf).filter(Boolean))].sort().reverse();
+  const q=A.q.toLowerCase();
+  const list=all.filter(b=>(A.kingdom==='all'||b.kingdom===A.kingdom)&&(A.cat==='all'||b.category===A.cat)&&(A.year==='all'||yearOf(b)===A.year)&&(A.status==='all'||bidStatus(b)===A.status)
+    &&(!q||[b.eventName,b.theme,b.hostPark,b.site?.name,b.site?.location,b.submitter?.persona,...(b.crats||[]).map(x=>x.name),callById(b.callId)?.title].join(' ').toLowerCase().includes(q)))
+    .sort((a,b)=>(b.start||'').localeCompare(a.start||''));
+  const acc=list.filter(b=>bidStatus(b)==='accepted'),att=list.map(b=>num(b.attendance?.expected)).filter(Boolean),gates=list.map(b=>num(b.cost?.gatePre)).filter(Boolean).sort((a,b)=>a-b);
+  const med=gates.length?gates[Math.floor(gates.length/2)]:null;
+  const sel=(id,cur,opts)=>`<select id="${id}" aria-label="${id}">${opts.map(([v,n])=>`<option value="${esc(v)}" ${cur===v?'selected':''}>${esc(n)}</option>`).join('')}</select>`;
+  const hasEx=S.bids.some(b=>b.example)||S.calls.some(c=>c.example);
+  $('#view').innerHTML=`<div class="filters"><input id="aq" class="search" type="search" placeholder="Search events, sites, parks, crats" value="${esc(A.q)}">
+      ${sel('akingdom',A.kingdom,[['all','All kingdoms'],...kingdoms.map(k=>[k,k])])}
+      ${sel('acat',A.cat,[['all','All event types'],...CATS.map(c=>[c.k,c.n])])}
+      ${sel('ayear',A.year,[['all','All years'],...years.map(y=>[y,y])])}
+      ${sel('astatus',A.status,[['all','Any outcome'],...Object.entries(BID_ST).filter(([k])=>k!=='draft')])}</div>
+    <div class="tiles"><div class="tile"><div class="l">Bids on file</div><div class="v">${list.length}</div></div>
+      <div class="tile"><div class="l">Won their event</div><div class="v">${acc.length}</div></div>
+      <div class="tile"><div class="l">Avg. expected</div><div class="v">${att.length?Math.round(att.reduce((a,b)=>a+b,0)/att.length):'—'}</div></div>
+      <div class="tile"><div class="l">Median gate</div><div class="v">${med!==null?money(med):'—'}</div></div></div>
+    <div class="panel">${list.length?`<div class="scroll"><table><thead><tr><th>Event</th><th>Type</th><th>Kingdom</th><th>Dates</th><th>Site</th><th class="n">Expected</th><th class="n">Gate</th><th>Outcome</th></tr></thead><tbody>
+      ${list.map(b=>`<tr class="click" data-act="openBid" data-id="${b.id}"><td><b>${esc(b.eventName)}</b>${exMark(b)}<small>${esc(b.theme||'')}${b.submitter?.persona?' · '+esc(b.submitter.persona):''}</small></td><td>${catMark(b.category)}</td><td>${esc(b.kingdom)}<small>${esc(b.hostPark)}</small></td><td>${fRange(b.start,b.end)}</td><td>${esc(b.site?.name)}<small>${esc(b.site?.location)}</small></td><td class="n">${num(b.attendance?.expected)||'—'}</td><td class="n">${b.cost?.gatePre!==''&&b.cost?.gatePre!==undefined?money(num(b.cost.gatePre)):'—'}</td><td>${stPill(bidStatus(b),BID_ST)}</td></tr>`).join('')}
+      </tbody></table></div>`:'<p class="none">No bids match these filters.</p>'}
+      <p class="foot">Open any bid to read the full sheet, or use it as a template for your own.${hasEx?' Rows marked Example are sample records to show how the archive works.':''}</p>
+      ${hasEx&&S.officer?`<button class="btn danger sm ${S.confirm==='clearEx'?'armed':''}" data-act="clearEx">${S.confirm==='clearEx'?'Tap again to remove all example records':'Remove example records'}</button>`:''}</div>`;
+}
+
+/* ----- bid sheet ----- */
+function renderBid(){
+  const b=bidById(S.sel);if(!b){go(S.prev||'archive');return;}
+  const s=bidStatus(b),c=callById(b.callId),x=budget(b),d=S.dec[b.id],am=b.site?.amen||[];
+  const crats=(b.crats||[]).filter(r=>r.name||r.role);
+  const backTo=S.prev==='calls'&&c?`<button class="btn ghost sm back" data-act="openCall" data-id="${c.id}">← ${esc(c.title)}</button>`:`<button class="btn ghost sm back" data-act="tab" data-v="${S.prev||'archive'}">← Back</button>`;
+  const editable=canEditBid(b)&&['draft','submitted'].includes(s);
+  $('#view').innerHTML=`${backTo}<div class="stack"><div class="panel">
+    <div class="sheet-head"><div class="row between" style="align-items:center">${catMark(b.category)}<span>${stPill(s,BID_ST)}${exMark(b)}</span></div>
+      <h2>${esc(b.eventName||'Untitled bid')}</h2>${b.theme?`<div class="theme">${esc(b.theme)}</div>`:''}
+      <div class="muted">${esc(b.kingdom)}${b.hostPark?' · hosted by '+hostLabel(b):''}${c?` · for <button class="linkish" data-act="openCall" data-id="${c.id}">${esc(c.title)}</button>`:' · independent bid'}${b.submittedAt?' · submitted '+new Date(b.submittedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):''}</div>
+      <div class="acts">${editable?`<button class="btn ghost sm" data-act="editBid" data-id="${b.id}">Edit bid</button>`:''}${editable&&s==='submitted'&&(b.owner===S.me||!b.owner)?`<button class="btn ghost sm ${S.confirm==='wd'+b.id?'armed':''}" data-act="withdraw" data-id="${b.id}">${S.confirm==='wd'+b.id?'Tap again to withdraw':'Withdraw'}</button>`:''}<button class="btn ghost sm" data-act="template" data-id="${b.id}">Use as a template</button>${forkActs(b,s,d)}</div></div>
+    ${b.themeDesc?`<p class="prose" style="margin-bottom:16px">${esc(b.themeDesc)}</p>`:''}
+    <div class="sgrid">
+      <section><h3>Dates and site</h3><dl class="meta"><dt>Dates</dt><dd>${fRange(b.start,b.end)}</dd><dt>Site</dt><dd>${esc(b.site?.name)||'—'}${b.site?.location?'<br><span class="muted">'+esc(b.site.location)+'</span>':''}${/^https?:\/\//.test(b.site?.url||'')?`<br><a href="${esc(b.site.url)}" target="_blank" rel="noopener">Site website</a>`:''}</dd>
+        <dt>Booking</dt><dd>${esc(RESERVE[b.site?.reserve]||'—')}</dd><dt>Capacity</dt><dd class="num">${esc(b.site?.capacity)||'—'}</dd>${b.site?.acres?`<dt>Space</dt><dd>${esc(b.site.acres)}</dd>`:''}</dl>
+        <div class="amen" style="margin-top:10px">${AMEN.map(([k,n])=>`<span class="${am.includes(k)?'y':'n'}">${n}</span>`).join('')}</div>
+        ${b.site?.notes?`<p class="prose muted" style="margin-top:10px">${esc(b.site.notes)}</p>`:''}</section>
+      <section><h3>Crats</h3>${crats.length?`<dl class="meta">${crats.map(r=>`<dt>${esc(r.role)}</dt><dd>${esc(r.name)||'<span class="muted">Open</span>'}</dd>`).join('')}</dl>`:'<p class="none">None listed.</p>'}
+        <h3 style="margin-top:16px">Submitted by</h3><p style="margin:0">${esc(b.submitter?.persona)||'—'}${b.submitter?.park?' · '+esc(b.submitter.park):''}${b.submitter?.contact?`<br><span class="muted" style="user-select:all">${esc(b.submitter.contact)}</span>`:''}</p></section>
+      <section><h3>Attendance and budget</h3><dl class="meta"><dt>Expected</dt><dd class="num">${num(b.attendance?.expected)||'—'}${b.attendance?.lastYear?` <span class="muted">(last run: ${esc(b.attendance.lastYear)})</span>`:''}</dd>
+        <dt>Gate</dt><dd class="num">${b.cost?.gatePre!==''?money(num(b.cost?.gatePre))+' pre-reg':'—'}${num(b.cost?.gateDoor)?' · '+money(num(b.cost.gateDoor))+' door':''}${num(b.cost?.youth)?' · '+money(num(b.cost.youth))+' youth':''}</dd>
+        <dt>Costs</dt><dd class="num">Site ${money(num(b.cost?.siteRental))} · Insurance ${money(num(b.cost?.insurance))} · Other ${money(num(b.cost?.other))}</dd>
+        <dt>Net</dt><dd><b class="num" style="color:var(--${x.net<0?'warn':'good'})">${money(x.net)}</b>${x.be?` <span class="muted">· breaks even at ${x.be}</span>`:''}</dd></dl></section>
+      <section><h3>Feast</h3>${b.feast?.offered?`<dl class="meta"><dt>Meals</dt><dd>${esc(b.feast.meals)||'—'}</dd><dt>Price</dt><dd class="num">${num(b.cost?.feastFee)?money(num(b.cost.feastFee)):'Included with gate'}</dd><dt>Seats</dt><dd class="num">${num(b.cost?.feastCount)||'—'}</dd>
+        ${(b.feast.diet||[]).length?`<dt>Dietary</dt><dd>${DIET.filter(d=>b.feast.diet.includes(d[0])).map(d=>d[1]).join(', ')}</dd>`:''}</dl>${b.feast.menu?`<p class="prose" style="margin-top:8px">${esc(b.feast.menu)}</p>`:''}`:'<p class="none">No feast in this bid.</p>'}</section>
+      <section><h3>Event features</h3><dl class="meta"><dt>A&S</dt><dd>${esc(optName(AS_OPT,b.extras?.as))}</dd><dt>Tournament</dt><dd>${esc(optName(FIGHT_OPT,b.extras?.fight))}</dd><dt>Feast</dt><dd>${feastStyle(b)}</dd></dl>
+        ${bgSorted(b).length?`<h3 style="margin-top:14px;font-size:1rem">Themed battlegames</h3><ul class="bgl">${bgSorted(b).map(g=>`<li><span class="t">${bgWhen(g)}</span><span>${esc(g.theme||'Battlegame')}</span></li>`).join('')}</ul>`:'<p class="none" style="margin-top:8px">No themed battlegames listed.</p>'}</section>
+      <section><h3>Program</h3>${(b.program?.acts||[]).length?`<div class="amen">${ACTS.filter(a=>b.program.acts.includes(a[0])).map(a=>`<span class="y">${a[1]}</span>`).join('')}</div>`:''}${b.program?.schedule?`<p class="prose" style="margin-top:10px">${esc(b.program.schedule)}</p>`:''}${!(b.program?.acts||[]).length&&!b.program?.schedule?'<p class="none">No program listed.</p>':''}</section>
+      ${b.notes?`<section><h3>Notes to the kingdom</h3><p class="prose">${esc(b.notes)}</p></section>`:''}
+    </div></div>
+    ${d?.note||manages(bidCall(b))||S.officer?`<div class="panel decision"><h2>Kingdom decision</h2>${d?.note?`<p class="prose">${esc(d.note)}</p>`:''}
+      ${(manages(bidCall(b))||S.officer)&&s!=='draft'&&s!=='withdrawn'?`<form id="decForm" class="row" style="margin-top:10px"><div class="field xs" style="flex-basis:170px"><label for="decSt">Outcome</label><select id="decSt">${['submitted','accepted','declined'].map(k=>`<option value="${k}" ${s===k?'selected':''}>${k==='submitted'?'Under review':BID_ST[k]}</option>`).join('')}</select></div>
+        <div class="field" style="flex-basis:320px"><label for="decNote">Note to the bidder</label><input id="decNote" value="${esc(d?.note)}" placeholder="Voted 6–2 at Althing. Strong site, feast budget tight."></div><button class="btn" type="submit">Record decision</button></form>`:''}</div>`:''}
+    ${(manages(bidCall(b))||S.officer)&&s!=='draft'?`<div class="panel"><h2>Private review <span class="muted" style="font-family:var(--body);font-weight:500;font-size:.95rem">only the call’s host and kingdom officers see this</span></h2>
+      <div class="row" style="align-items:center;margin-bottom:10px"><span class="lbl">Rating</span>${stars(b.id)}</div>
+      <form id="revForm" class="row"><div class="field" style="flex-basis:360px"><label for="revNote">Private notes</label><input id="revNote" value="${esc(S.rev[b.id]?.note)}" placeholder="Ask about a backup site. Love the ember quest."></div><button class="btn ghost" type="submit">Save notes</button></form></div>`:''}</div>`;
+}
+function stars(id){const r=S.rev[id]?.rating||0;return `<span class="stars" role="group" aria-label="Rating">${[1,2,3,4,5].map(n=>`<button type="button" class="${n<=r?'on':''}" data-act="star" data-id="${id}" data-v="${n}" aria-label="${n} of 5">★</button>`).join('')}</span>`;}
+
+/* ----- monarch's desk ----- */
+const commKey=b=>(b.eventName||'').trim().toLowerCase().replace(/\s+\d{4}$/,'')+'|'+yearOf(b);
+const isComm=b=>!b.callId||!callById(b.callId);
+function communityGroups(){const g={};S.bids.filter(b=>isComm(b)&&bidStatus(b)!=='draft').forEach(b=>{const k=commKey(b);(g[k]||(g[k]={id:'ind:'+k,pseudo:true,key:k,title:(b.eventName||'Untitled').replace(/\s+\d{4}$/,'')+(yearOf(b)?' '+yearOf(b):''),category:b.category,kingdom:b.kingdom,bids:[],start:b.start||''})).bids.push(b);});
+  return Object.values(g).map(x=>({...x,decided:x.bids.some(b=>bidStatus(b)==='accepted')})).sort((a,b)=>a.decided-b.decided||(b.start||'').localeCompare(a.start||''));}
+const deskBids=c=>c.pseudo?S.bids.filter(b=>isComm(b)&&bidStatus(b)!=='draft'&&commKey(b)===c.key):bidsFor(c.id);
+function renderDesk(){
+  const ord={open:0,review:1,awarded:2,closed:3};
+  const real=S.calls.filter(c=>S.officer||manages(c)).sort((a,b)=>ord[callStatus(a)]-ord[callStatus(b)]||(a.deadline||'').localeCompare(b.deadline||''));
+  const comm=S.officer?communityGroups():[];
+  const calls=[...real,...comm];
+  if(!calls.length){$('#view').innerHTML='<div class="empty"><h2>No events yet</h2><p>Post a call for bids, or wait for a group to bid on a kingdom-level event. Every bid lines up here.</p></div>';return;}
+  const find=id=>calls.find(x=>x.id===id);
+  if(!S.desk||!find(S.desk))S.desk=(calls.find(c=>['open','review','community'].includes(c.pseudo?(c.decided?'x':'community'):callStatus(c))&&deskBids(c).length)||calls[0]).id;
+  const c=find(S.desk),st=c.pseudo?'community':callStatus(c);
+  const bids=deskBids(c).filter(b=>bidStatus(b)!=='withdrawn').sort((a,b)=>(S.rev[b.id]?.rating||0)-(S.rev[a.id]?.rating||0)||(a.submittedAt||0)-(b.submittedAt||0));
+  const nm={};bids.forEach(b=>nm[b.eventName]=(nm[b.eventName]||0)+1);const lab=b=>nm[b.eventName]>1?[b.hostPark||b.submitter?.persona,b.theme].filter(Boolean).join(': ')||b.eventName:b.eventName;
+  const wd=deskBids(c).length-bids.length, dl=daysTo(c.deadline);
+  const chip=x=>`<button class="chip ${x.id===c.id?'on':''}" data-act="desk" data-id="${esc(x.id)}"><span class="cat" style="${cc(x.category)}"></span>${esc(x.title)} <small>${deskBids(x).filter(b=>bidStatus(b)!=='withdrawn').length}</small></button>`;
+  const picker=`${real.length?`<div class="lbl" style="margin-bottom:6px">Calls for bids</div><div class="chips">${real.map(chip).join('')}</div>`:''}${comm.length?`<div class="lbl" style="margin-bottom:6px">Community-hosted kingdom events</div><div class="chips">${comm.map(chip).join('')}</div>`:''}`;
+  const exps=bids.map(b=>num(b.attendance?.expected)),gates=bids.map(b=>b.cost?.gatePre===''||b.cost?.gatePre===undefined?null:num(b.cost.gatePre)).filter(x=>x!==null);
+  const topE=exps.length?Math.max(...exps):null, topB=bids[exps.indexOf(topE)], lowG=gates.length?Math.min(...gates):null;
+  const tiles=`<div class="tiles"><div class="tile"><div class="l">Bids received</div><div class="v">${bids.length}</div>${wd?`<small class="muted">${wd} withdrawn</small>`:''}</div>
+    <div class="tile"><div class="l">${st==='open'?'Bids due':'Bidding'}</div><div class="v">${st==='open'&&dl!==null?(dl<0?'Closed':dl+' days'):esc(CALL_ST[st]||(c.decided?'Decided':'No deadline'))}</div><small class="muted">${c.deadline?fDate(c.deadline):''}</small></div>
+    <div class="tile"><div class="l">Largest draw</div><div class="v">${topE||'—'}</div><small class="muted">${topB?esc(lab(topB)):''}</small></div>
+    <div class="tile"><div class="l">Lowest gate</div><div class="v">${lowG!==null?money(lowG):'—'}</div><small class="muted">pre-registered</small></div></div>`;
+  const maxA=Math.max(1,...bids.map(b=>Math.max(num(b.attendance?.expected),num(b.site?.capacity))));
+  const att=bids.map(b=>{const e=num(b.attendance?.expected),cp=num(b.site?.capacity),over=cp&&e>cp,base=cp||e;
+    return `<div class="bar" tabindex="0" data-tip="${esc(lab(b))}
+Expected: ${e||'not given'}
+Site capacity: ${cp||'not given'}${num(c.minCapacity)?'\nCall minimum: '+esc(c.minCapacity):''}"><span class="nm">${esc(lab(b))}</span><span class="track" style="width:${base/maxA*100}%;min-width:2px"><span class="fill" style="width:${base?Math.min(100,e/base*100):0}%"></span></span><span class="val"><b>${e||'—'}</b> / ${cp||'?'}${over?' <b style="color:var(--warn)">over capacity</b>':''}</span></div>`;}).join('');
+  const nets=bids.map(b=>budget(b).net),maxN=Math.max(1,...nets.map(Math.abs));
+  const net=bids.map((b,i)=>{const n=nets[i],x=budget(b);return `<div class="bar" tabindex="0" data-tip="${esc(lab(b))}
+Projected net: ${money(n)}${x.be?'\nBreaks even at '+x.be+' paid':''}"><span class="nm">${esc(lab(b))}</span><span class="dv"><span class="fill ${n<0?'neg':'pos'}" style="width:${Math.abs(n)/maxN*50}%"></span></span><span class="val"><b>${n<0?'':'+'}${money(n)}</b></span></div>`;}).join('');
+  const charts=`<div class="cgrid2"><div class="panel"><h2 style="font-size:1.1rem;margin-bottom:6px">Expected attendance vs. site capacity</h2><div class="legend"><span><i style="background:var(--c-midreign)"></i>Expected</span><span><i style="background:color-mix(in srgb,var(--c-midreign) 16%,transparent)"></i>Site capacity</span></div><div class="bars">${att}</div></div>
+    <div class="panel"><h2 style="font-size:1.1rem;margin-bottom:6px">Projected net</h2><div class="legend"><span><i style="background:var(--good)"></i>Surplus (+)</span><span><i style="background:var(--warn)"></i>Shortfall (−)</span></div><div class="bars">${net}</div></div></div>`;
+  const matrix=`<div class="panel" style="margin-bottom:16px"><h2 style="font-size:1.1rem">Every bid at a glance</h2><div class="scroll"><table class="mx"><thead><tr><th>Bid</th><th>Dates</th><th>Site</th><th>A&S</th><th>Tournament</th><th>Feast</th><th class="n">Battlegames</th><th class="n">Checklist</th><th>Your rating</th><th>Outcome</th><th></th></tr></thead><tbody>
+    ${bids.map(b=>{const ck=checks(b),okN=ck.filter(x=>x[1]).length,s=bidStatus(b);return `<tr><td><button class="linkish" data-act="openBid" data-id="${b.id}">${esc(lab(b))}</button>${exMark(b)}<small>${hostLabel(b)}${b.submitter?.persona?' · '+esc(b.submitter.persona):''}</small></td>
+      <td>${fRange(b.start,b.end)}</td><td>${esc(b.site?.name)||'—'}<small>${esc(RESERVE[b.site?.reserve]||'')}</small></td>
+      <td>${esc(optName(AS_OPT,b.extras?.as))}</td><td>${esc(optName(FIGHT_OPT,b.extras?.fight))}</td><td>${feastStyle(b)}</td>
+      <td class="n">${bgSorted(b).length||'—'}</td><td class="n" tabindex="0" data-tip="${esc(ck.map(x=>(x[1]?'✓ ':'— ')+x[0]).join('\n'))}">${okN}/${ck.length}</td>
+      <td>${stars(b.id)}</td><td>${stPill(s,BID_ST)}</td>
+      <td>${st!=='closed'&&s==='submitted'?`<button class="btn seal sm ${S.confirm==='award'+b.id?'armed':''}" data-act="award" data-id="${b.id}">${S.confirm==='award'+b.id?'Tap again':'Award'}</button>`:''}</td></tr>`;}).join('')}
+    </tbody></table></div><p class="foot">Sorted by your rating. Ratings and private notes are visible only to kingdom officers. Hover or tap a checklist score to see what’s missing.</p></div>`;
+  const bgs=`<div class="panel"><h2 style="font-size:1.1rem">Battlegame line-ups</h2><div class="bgcards">${bids.map(b=>{const g=bgSorted(b);return `<div class="bgcard"><h3>${esc(lab(b))}</h3>${g.length?`<ul class="bgl">${g.map(x=>`<li><span class="t">${bgWhen(x)}</span><span>${esc(x.theme||'Battlegame')}</span></li>`).join('')}</ul>`:'<p class="none" style="margin:0">None listed.</p>'}</div>`;}).join('')}</div></div>`;
+  $('#view').innerHTML=`${picker}<div class="deskhead"><div>${catMark(c.category)} ${stPill(st,{...CALL_ST,...CALL_ST_X})}<h2 style="margin-top:6px">${esc(c.title)}${exMark(c)}</h2><div class="muted">${esc(c.kingdom)}${c.pseudo?' · bids from parks, households, companies and guilds, no posted call':`${c.term?' · '+esc(c.term):''} · window ${fRange(c.windowStart,c.windowEnd)}`}</div></div>
+    <div class="acts">${c.pseudo?'':`<button class="btn ghost sm" data-act="openCall" data-id="${c.id}">Open call page</button>`}${st==='open'?`<button class="btn ghost sm" data-act="callSt" data-id="${c.id}" data-v="review">Close bidding</button>`:''}</div></div>
+    ${tiles}${bids.length?charts+matrix+bgs:'<div class="empty"><h2>No bids yet</h2><p>Bids submitted for this event show up here as they arrive.</p></div>'}`;
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,id=t.dataset.id;
+  if(a==='tab'){if(t.dataset.v==='build'&&!S.draft)S.draft=blankBid('');S.callEdit=undefined;go(t.dataset.v);}
+  else if(a==='catF'){S.catF=t.dataset.v;render();}
+  else if(a==='openCall'){S.callEdit=undefined;go('call',id);}
+  else if(a==='openBid'){go('bid',id);}
+  else if(a==='bidOn'){startBid(id);}
+  else if(a==='newBid'){startBid('');}
+  else if(a==='newCall'){S.callEdit=null;render();$('#cTitle')?.focus();}
+  else if(a==='editCall'){S.callEdit=id;S.view='calls';render();$('#callForm')?.scrollIntoView({behavior:'smooth'});}
+  else if(a==='cancelCall'){S.callEdit=undefined;render();}
+  else if(a==='callSt'){await w(()=>S.db.doc('calls/'+id).update({status:t.dataset.v}),'Bidding closed. The call is now under review.');}
+  else if(a==='delCall'){if(arm('delC'+id)){if(await w(()=>S.db.doc('calls/'+id).delete(),'Call deleted. Its bids stay in the archive.'))go('calls');}}
+  else if(a==='award'){if(arm('award'+id)){const b=bidById(id);await w(async()=>{
+      await S.db.doc('decisions/'+id).set({status:'accepted',note:S.dec[id]?.note||'Awarded the event.',at:Date.now()});
+      const rivals=isComm(b)?S.bids.filter(o=>isComm(o)&&commKey(o)===commKey(b)):bidsFor(b.callId);
+      for(const o of rivals){if(o.id!==id&&bidStatus(o)==='submitted')await S.db.doc('decisions/'+o.id).set({status:'declined',note:S.dec[o.id]?.note||'',at:Date.now()});}
+      if(!isComm(b))await S.db.doc('calls/'+b.callId).update({status:'awarded',awardedBid:id});},'Awarded to '+b.eventName+'.');}}
+  else if(a==='editBid'){const b=bidById(id);S.draft=normalize(JSON.parse(JSON.stringify(b)));delete S.draft.id;S.editId=id;S.bad=new Set();go('build');}
+  else if(a==='template'){const b=bidById(id);const n=JSON.parse(JSON.stringify(b));['id','owner','createdAt','submittedAt','updatedAt','example'].forEach(k=>delete n[k]);
+      n.status='draft';n.start='';n.end='';n.eventName='';n.callId='';n.site.reserve='none';S.draft=normalize(n);S.editId=null;S.bad=new Set();go('build');toast('Copied into a new draft. Pick a call, set dates and name your event.');}
+  else if(a==='withdraw'){if(arm('wd'+id))await w(()=>S.db.doc('bids/'+id).update({status:'withdrawn',updatedAt:Date.now()}),'Bid withdrawn.');}
+  else if(a==='delBid'){if(arm('delB'+id))await w(()=>S.db.doc('bids/'+id).delete(),'Draft deleted.');}
+  else if(a==='cancelBuild'){S.draft=null;S.editId=null;go(S.prev==='build'?'mine':S.prev||'mine');}
+  else if(a==='saveBid'){saveBid(t.dataset.v);}
+  else if(a==='addCrat'){collect();S.draft.crats.push({role:t.dataset.v||'',name:''});renderBuild();const ins=document.querySelectorAll('#crats input');(t.dataset.v?ins[ins.length-1]:ins[ins.length-2])?.focus();}
+  else if(a==='addBg'){collect();S.draft.extras.battlegames.push({theme:'',date:S.draft.start||'',start:'',end:''});renderBuild();const ins=document.querySelectorAll('#bgs input[data-bg=theme]');ins[ins.length-1]?.focus();}
+  else if(a==='rmBg'){collect();S.draft.extras.battlegames.splice(+t.dataset.i,1);renderBuild();}
+  else if(a==='desk'){S.desk=id;render();}
+  else if(a==='star'){const r=S.rev[id]||{};await w(()=>S.db.doc('reviews/'+id).set({...r,rating:+t.dataset.v,callOwner:bidCall(bidById(id))?.owner||null,at:Date.now()}));}
+  else if(a==='rmCrat'){collect();S.draft.crats.splice(+t.dataset.i,1);renderBuild();}
+  else if(a==='clearEx'){if(arm('clearEx')){await w(async()=>{for(const b of S.bids.filter(x=>x.example)){await S.db.doc('bids/'+b.id).delete();if(S.dec[b.id])await S.db.doc('decisions/'+b.id).delete();}for(const c of S.calls.filter(x=>x.example))await S.db.doc('calls/'+c.id).delete();},'Example records removed.');}}
+});
+document.addEventListener('input',e=>{
+  if(e.target.closest('#bForm')){if(e.target.id==='callId'){collect();const c=callById(S.draft.callId);if(c){S.draft.category=c.category;S.draft.kingdom=c.kingdom;if(!S.draft.eventName)S.draft.eventName=c.title;}renderBuild();return;}updateSide();}
+  if(e.target.id==='aq'){S.arch.q=e.target.value;const pos=e.target.selectionStart;renderArchive();const q=$('#aq');q.focus();try{q.setSelectionRange(pos,pos);}catch(_){}}
+});
+document.addEventListener('change',e=>{
+  if(e.target.name==='x.feast'&&S.view==='build'){collect();renderBuild();return;}
+  const m={akingdom:'kingdom',acat:'cat',ayear:'year',astatus:'status'}[e.target.id];if(m){S.arch[m]=e.target.value;renderArchive();}
+  if(e.target.closest('#bForm'))updateSide();
+});
+document.addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(e.target.id==='cForm'){const v=id=>$('#'+id)?.value.trim()||'';const cat=document.querySelector('input[name=cCat]:checked')?.value;
+    if(!v('cTitle')||!v('cKingdom')||!v('cDl')||!cat){toast('A call needs an event type, name, kingdom and bid deadline.');return;}
+    const data={category:cat,title:v('cTitle'),kingdom:v('cKingdom'),park:v('cPark'),term:v('cTerm'),windowStart:v('cWs'),windowEnd:v('cWe'),deadline:v('cDl'),minCapacity:v('cMin'),requirements:v('cReq'),updatedAt:Date.now()};
+    const editing=S.callEdit;
+    const ok=await w(async()=>{if(editing){data.status=v('cSt')||'open';await S.db.doc('calls/'+editing).update(data);}else{data.status='open';data.createdAt=Date.now();data.owner=S.me||null;await S.db.collection('calls').add(data);}},editing?'Call updated.':'Call posted. Players can bid on it now.');
+    if(ok){S.callEdit=undefined;render();}}
+  if(e.target.id==='revForm'){const r=S.rev[S.sel]||{};await w(()=>S.db.doc('reviews/'+S.sel).set({...r,note:$('#revNote').value.trim(),callOwner:bidCall(bidById(S.sel))?.owner||null,at:Date.now()}),'Notes saved.');}
+  if(e.target.id==='decForm'){const st=$('#decSt').value,note=$('#decNote').value.trim();
+    await w(()=>S.db.doc('decisions/'+S.sel).set({status:st,note,at:Date.now()}),'Decision recorded.');}
+});
+
+function showTip(t,x,y){const tip=$('#tip');tip.textContent=t.dataset.tip;tip.hidden=false;tip.style.left=Math.max(8,Math.min(x+14,innerWidth-tip.offsetWidth-8))+'px';tip.style.top=(y+16+tip.offsetHeight>innerHeight?y-tip.offsetHeight-10:y+16)+'px';}
+document.addEventListener('pointermove',e=>{const t=e.target.closest('[data-tip]');if(!t){$('#tip').hidden=true;return;}showTip(t,e.clientX,e.clientY);});
+document.addEventListener('focusin',e=>{const t=e.target.closest('[data-tip]');if(!t){$('#tip').hidden=true;return;}const r=t.getBoundingClientRect();showTip(t,r.left,r.bottom-10);});
+document.addEventListener('scroll',()=>{$('#tip').hidden=true;},{passive:true});
+/* ---------- boot ---------- */
+render();
+(async()=>{
+  const cl=window.claude;
+  const [db,user]=await Promise.all([cl?.use?cl.use('db').catch(()=>null):null,cl?.use?cl.use('user').catch(()=>null):null]);
+  if(!db){S.offline=true;S.officer=true;render();return;}
+  S.db=db;S.user=user;
+  if(user){try{S.me=await user.id();}catch(e){}try{S.officer=(await user.canEdit())||(await user.isOwner());}catch(e){}}
+  const seen=new Set(),mark=k=>{seen.add(k);if(seen.size>=3)S.ready=true;};
+  const keep=()=>{if(S.view==='build'&&$('#bForm'))updateSide();else render();};
+  db.collection('calls').onSnapshot(s=>{S.calls=s.docs.map(d=>({id:d.id,...d.data()}));mark('c');
+    if(deepCall&&S.calls.some(x=>x.id===deepCall)){const id=deepCall;deepCall=null;go('call',id);return;}keep();},e=>{console.error(e);mark('c');keep();});
+  db.collection('bids').onSnapshot(s=>{S.bids=s.docs.map(d=>({id:d.id,...d.data()}));mark('b');
+    if(deepBid&&S.bids.some(x=>x.id===deepBid)){const id=deepBid;deepBid=null;go('bid',id);return;}keep();},e=>{console.error(e);mark('b');keep();});
+  if(S.officer)db.collection('reviews').onSnapshot(s=>{const o={};s.docs.forEach(d=>o[d.id]=d.data());S.rev=o;keep();},e=>console.warn(e));
+  else if(S.me&&db.reviewsFor)db.reviewsFor(S.me).onSnapshot(s=>{const o={};s.docs.forEach(d=>o[d.id]=d.data());S.rev=o;keep();},e=>console.warn(e));
+  db.collection('decisions').onSnapshot(s=>{const o={};s.docs.forEach(d=>o[d.id]=d.data());S.dec=o;mark('d');keep();},e=>{console.error(e);mark('d');keep();});
+})();
+</script>
+
+</body>
+</html>

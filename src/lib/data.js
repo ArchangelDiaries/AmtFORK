@@ -51,7 +51,7 @@ export async function createEvent(user, data) {
   b.set(ref, { ...blankEvent(), ...data, ownerUid: user.uid,
     crats: { auto: { name: user.displayName || email } }, createdAt: serverTimestamp() });
   b.set(doc(db, 'access', ref.id), {
-    ownerUid: user.uid, roles: { [email]: ['auto'] }, staffEmails: [email],
+    ownerUid: user.uid, ownerEmail: email, roles: { [email]: ['auto'] }, staffEmails: [email],
     contacts: { auto: { name: user.displayName || email, email } },
   });
   await b.commit();
@@ -67,8 +67,9 @@ export async function assignCrat(eid, access, role, name, email) {
   // roles are rebuilt from contacts; the owner always stays Autocrat-capable.
   const roles = {};
   for (const [r, c] of Object.entries(contacts)) (roles[c.email] ||= []).push(r);
-  const ownerEmail = Object.entries(access.roles || {}).find(([, rs]) => rs.includes('auto'))?.[0];
-  if (!Object.values(roles).some(rs => rs.includes('auto')) && ownerEmail) (roles[ownerEmail] ||= []).push('auto');
+  // The event's creator always stays on the crat team (as an Autocrat), even when another Autocrat is named.
+  const ownerEmail = access.ownerEmail || Object.entries(access.roles || {}).find(([, rs]) => rs.includes('auto'))?.[0];
+  if (ownerEmail && !(roles[ownerEmail] || []).includes('auto')) (roles[ownerEmail] ||= []).push('auto');
   const b = writeBatch(db);
   b.update(doc(db, 'access', eid), { contacts, roles, staffEmails: Object.keys(roles) });
   b.update(doc(db, 'events', eid), { [`crats.${role}`]: email ? { name: name || email.split('@')[0] } : null });

@@ -4,14 +4,14 @@
 // "Amtgard ORK — API Access" document. Settings (Netlify → Site configuration → Environment variables,
 // scope: Functions — never a VITE_ variable, which would ship the key to every browser):
 //   ORK_API_KEY     the 64-character key issued by the ORK administrators (secret)
-//   ORK_CLIENT      optional product token, default "FORK/1.2" (plain text, NOT the key)
+//   ORK_CLIENT      optional product token, default "FORK/1.0" (plain text, NOT the key)
 //   ORK_CONTACT     optional contact email for the User-Agent, so the ORK team can reach you
 //
 // Feast preferences: the ORK web service doesn't expose them, and the key only works on /orkservice/*,
 // so FORK can fill in persona, park and kingdom, and players enter feast preferences on the form.
 
 const ORK_JSON = 'https://ork.amtgard.com/orkservice/Json/index.php';
-const CLIENT = process.env.ORK_CLIENT || 'FORK/1.2';
+const CLIENT = process.env.ORK_CLIENT || 'FORK/1.0';
 const SITE = process.env.URL || 'https://amtgardfork.netlify.app';
 const UA = `${CLIENT} (+${SITE}${process.env.ORK_CONTACT ? `; ${process.env.ORK_CONTACT}` : ''})`;
 

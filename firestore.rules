@@ -112,5 +112,62 @@ service cloud.firestore {
         allow delete: if hasRole(eid, 'feast');
       }
     }
+  
+    /* ================= The Herald's Call (bids), served from /herald/ ================= */
+    // ----- BEGIN Herald's Call -----
+    // Anyone signed in can post a call for bids. The call's poster (its "host") and kingdom officers
+    // manage it: edit, close bidding, record decisions, award, and keep private reviews of its bids.
+    function heraldSignedIn() { return request.auth != null; }
+    function heraldOfficer() {
+      return heraldSignedIn() && request.auth.token.email != null &&
+        exists(/databases/$(database)/documents/herald_officers/$(request.auth.token.email.lower()));
+    }
+    function heraldCall(id) { return get(/databases/$(database)/documents/herald_calls/$(id)).data; }
+    // Is the signed-in person the host of the call this bid answers?
+    function heraldHostsBid(bidId) {
+      let bid = get(/databases/$(database)/documents/herald_bids/$(bidId)).data;
+      return heraldSignedIn() && bid.get('callId', '') != ''
+        && exists(/databases/$(database)/documents/herald_calls/$(bid.callId))
+        && heraldCall(bid.callId).get('owner', '') == request.auth.uid;
+    }
+
+    // Calls for bids: public; any signed-in person can post one as its owner.
+    match /herald_calls/{id} {
+      allow read: if true;
+      allow create: if heraldSignedIn() && request.resource.data.owner == request.auth.uid;
+      allow update: if heraldOfficer()
+        || (heraldSignedIn() && resource.data.get('owner', '') == request.auth.uid
+            && request.resource.data.owner == resource.data.owner);
+      allow delete: if heraldOfficer() || (heraldSignedIn() && resource.data.get('owner', '') == request.auth.uid);
+    }
+
+    // Bids: public; signed-in players create their own and edit or delete only their own.
+    match /herald_bids/{id} {
+      allow read: if true;
+      allow create: if heraldSignedIn() && request.resource.data.owner == request.auth.uid;
+      allow update: if heraldOfficer() ||
+        (heraldSignedIn() && resource.data.owner == request.auth.uid && request.resource.data.owner == request.auth.uid);
+      allow delete: if heraldOfficer() || (heraldSignedIn() && resource.data.owner == request.auth.uid);
+    }
+
+    // Decisions: public so bidders see the outcome; the call's host or an officer records them.
+    match /herald_decisions/{bidId} {
+      allow read: if true;
+      allow write: if heraldOfficer() || heraldHostsBid(bidId);
+    }
+
+    // Private ratings and notes: officers, and the host of the call (reviews carry callOwner for querying).
+    match /herald_reviews/{bidId} {
+      allow read: if heraldOfficer() || (heraldSignedIn() && resource.data.get('callOwner', '') == request.auth.uid);
+      allow write: if heraldOfficer()
+        || (heraldHostsBid(bidId) && request.resource.data.callOwner == request.auth.uid);
+    }
+
+    // Officer list: each person can check only their own entry. Add officers in the console.
+    match /herald_officers/{email} {
+      allow read: if heraldSignedIn() && request.auth.token.email.lower() == email;
+      allow write: if false;
+    }
+// ----- END Herald's Call -----
   }
 }

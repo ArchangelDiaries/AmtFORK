@@ -73,11 +73,28 @@ The Warcrat (or Autocrat) can create the event's Warmaster Tournament in Field M
 
 No changes to Field Marshal are needed. FORK uses its existing tournament and signup-request formats.
 
+## Bids to events: The Herald's Call
+FORK covers the whole event life cycle. **Anyone signed in can create an event**, and the New event form asks **"Open this event to bids?"**:
+
+- **No, run it in FORK now:** the event is created in FORK straight away, with you as its Autocrat.
+- **Yes, take bids first:** FORK posts a call for bids in The Herald's Call (`/herald/`) with the event type, level, kingdom or park, event window, bid deadline and requirements. You become the call's **host**. Then:
+  1. Autocrats sign in and submit bids covering theme, site, dates, budget, feast, crats and program.
+  2. On the **Bid Desk** you compare bids side by side, keep private ratings and notes, record decisions and award the winner. Only you and kingdom officers see the private reviews.
+  3. On the winning bid, the winner or you click **Start this event in FORK**. FORK opens a new event filled in from the bid, and can make the winning bidder the Autocrat with an emailed invite.
+
+Kingdom officers (the `herald_officers` list) can manage every call, plus independent bids on kingdom events.
+
+**How it fits together**
+- The Herald's Call runs on FORK's own Firebase project and sign-in. `herald/firebase-config.js` is generated at build time from the same `VITE_FB_*` settings, so there's nothing extra to configure. Its data lives in collections that start with `herald_`: calls, bids, decisions, reviews and officers.
+- Its security rules are already merged into `firestore.rules`. Re-publish the rules after this update.
+- **Officers (optional):** in the Firebase console, create a `herald_officers` collection. Add one document per kingdom officer, using their Google email in lowercase as the document ID. Officers can manage every call. Anyone else manages only the calls they post.
+- Bids are public once submitted, so the kingdom can see them. Drafts are hidden in the app, but anyone reading the database directly could see them.
+
 ## ORK lookups (API key)
 The ORK is behind Cloudflare's bot check. The ORK team gives each application a private key for its web service (`/orkservice/Json`), following their "Amtgard ORK — API Access" document.
 
 - **Set it up:** in Netlify, go to **Site configuration → Environment variables** and add `ORK_API_KEY` (the 64-character key from the ORK team). Mark it **Contains secret values** and give it the **Functions** scope. Optionally add `ORK_CONTACT` with an email address the ORK team can reach you at. Then redeploy.
-- **Keep the key server-side:** never name it `VITE_…`. That would put it into every visitor's browser. Only `netlify/functions/ork.js` reads it, and it's sent only as the `X-Ork-Key` header. It never goes in the URL or in `X-ORK-Client`, which is `FORK/1.2`.
+- **Keep the key server-side:** never name it `VITE_…`. That would put it into every visitor's browser. Only `netlify/functions/ork.js` reads it, and it's sent only as the `X-Ork-Key` header. It never goes in the URL or in `X-ORK-Client`, which is `FORK/1.0`.
 - **What fills in:** persona, park and kingdom, from `Player/GetPlayer` and `Park/GetParkShortInfo`. Results are cached for 5 minutes.
 - **What doesn't:** feast preferences. The ORK web service doesn't offer them, and the key doesn't work on the ORK's profile pages, so players pick them on the form. If the ORK team adds a web-service call for public feast preferences, `lib/orkParse.js` can be retired and the function extended.
 - **If the key leaks,** tell the ORK team right away. They issue a replacement and the old key stops working.
