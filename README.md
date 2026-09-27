@@ -25,10 +25,8 @@ All crats can see registrations. **Feast preferences and allergies are visible o
 
 In 2026 the ORK added **Dietary Preferences** to player profiles: diet, a "won't eat" list, and 17 allergens rated Mild or Severe. FORK uses exactly the same categories.
 
-- The ORK keeps these preferences **private unless the player turns on _Show My Feast Preferences_** in their profile's design settings. When it's on, the preferences appear on the public profile and FORK fills them in.
-- When it's off, FORK still fills in persona, park and kingdom, and the player picks their feast options on the form. The form tells them how to turn sharing on for next time.
-- FORK never asks for ORK passwords.
-- `netlify/functions/ork.js` fetches the public profile page (`Route=Player/profile/{id}`) and reads it with `lib/orkParse.js`. The parser follows the markup in `orkui/template/revised-frontend/Playernew_index.tpl` from github.com/amtgard/ORK3. If the ORK redesigns that page, update the parser and its tests in `tests/orkParse.test.js`.
+- The ORK web service doesn't offer these preferences yet, so FORK fills in persona, park and kingdom from the ORK and the player picks their feast options on the form. See **ORK lookups** below.
+- Registering for an event never asks for an ORK password. Only the optional **Sign in with ORK** on the crat sign-in page uses one (see below).
 
 ## Setup (about 20 minutes)
 
