@@ -1,6 +1,6 @@
 import { FIX } from './fixtures.js';
 const noop = async () => {};
-export const useAuth = () => ({ uid: 'u1', email: 'elaina@example.com', displayName: 'Elaina' });
+export const useAuth = () => (globalThis.__signedOut ? null : { uid: 'u1', email: 'elaina@example.com', displayName: 'Elaina' });
 export const col = (...p) => ({ __path: p.join('/') });
 const get = p => { const v = FIX[p]; return v && { id: p.split('/').pop(), ...v }; };
 export const useDoc = p => ({ loading: false, data: p ? get(p) : null, error: null });

@@ -325,7 +325,7 @@ function forkActs(b,s,d){if(s!=='accepted')return '';
   const eid=b.forkEventId||(d&&d.forkEventId), mine=S.officer||(S.me&&b.owner===S.me)||manages(bidCall(b));
   if(eid)return mine?`<a class="btn sm" href="/crat/${encodeURIComponent(eid)}">Open the event in FORK</a>`:`<a class="btn sm" href="/e/${encodeURIComponent(eid)}">Event page</a>`;
   return mine?`<a class="btn sm" href="/crat?fromBid=${encodeURIComponent(b.id)}">Start this event in FORK</a>`:'';}
-let deepBid=null,deepCall=null;try{const q=new URLSearchParams(location.search);deepBid=q.get('bid');deepCall=q.get('call');}catch(e){}
+let deepBid=null,deepCall=null,deepView=null;try{const q=new URLSearchParams(location.search);deepBid=q.get('bid');deepCall=q.get('call');deepView=q.get('view');}catch(e){}
 function bidStatus(b){if(b.status==='withdrawn')return 'withdrawn';if(b.status==='draft')return 'draft';return S.dec[b.id]?.status||b.status||'submitted';}
 function callStatus(c){return c.status||'open';}
 const canEditBid=b=>S.officer||!b.owner||b.owner===S.me;
@@ -354,7 +354,7 @@ function toast(m){const el=$('#toast');el.textContent=m;el.hidden=false;clearTim
 async function w(fn,ok){
   if(!S.db){toast('Bid records aren’t connected yet. Check firebase-config.js.');return false;}
   try{await fn();if(ok)toast(ok);return true;}catch(e){console.error(e);const c=e&&e.code;
-    toast((c==='invalid_argument'||c==='permission-denied')?'You don’t have permission for that. Sign in first. Kingdom officer actions need an officer account.':c==='quota_exceeded'?'Storage is full. Remove old example records to make room.':'Couldn’t save. Check your connection and try again.');return false;}
+    toast((c==='invalid_argument'||c==='permission-denied')?(!S.me?'Sign in first with the button at the top of the page. Anyone signed in can post calls and build bids.':'The database refused this. If FORK was just updated, publish the new firestore.rules in the Firebase console. Otherwise only the call’s host or a kingdom officer can do this.'):c==='quota_exceeded'?'Storage is full. Remove old example records to make room.':'Couldn’t save. Check your connection and try again.');return false;}
 }
 function arm(key){if(S.confirm===key){S.confirm=null;return true;}S.confirm=key;render();setTimeout(()=>{if(S.confirm===key){S.confirm=null;render();}},4000);return false;}
 function go(v,sel){if(S.view==='build'&&$('#bForm')&&S.draft)collect();if(S.view!=='bid'&&S.view!=='call')S.prev=S.view;S.view=v;S.sel=sel??null;remember();render();window.scrollTo(0,0);}
@@ -363,7 +363,7 @@ function go(v,sel){if(S.view==='build'&&$('#bForm')&&S.draft)collect();if(S.view
 function render(){
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.view||(S.view==='bid'&&b.dataset.v===S.prev)||(S.view==='call'&&b.dataset.v==='calls')));
   const role=$('#role');role.classList.toggle('officer',S.officer);
-  $('#roleTxt').textContent=S.offline?'Offline preview':S.officer?'Kingdom officer':myCalls().length?'Event host':'Player';
+  $('#roleTxt').textContent=S.offline?'Offline preview':S.officer?'Kingdom officer':myCalls().length?'Event host':S.me?'Player':'Not signed in';
   const mine=S.bids.filter(b=>S.me&&b.owner===S.me&&b.status==='draft').length;
   $('#mineCount').hidden=!mine;$('#mineCount').textContent=mine;
   $('#notice').innerHTML=S.offline?'<div class="banner">Bid records aren’t connected yet, so nothing you enter will be saved. Add your Firebase settings to firebase-config.js and redeploy.</div>':'';
@@ -395,7 +395,7 @@ function renderCalls(){
         ${aw?`<dt>Awarded</dt><dd>${esc(aw.eventName)}</dd>`:''}</dl>
       <div class="acts"><button class="btn ghost sm" data-act="openCall" data-id="${c.id}">View call${n?' and compare bids':''}</button>
         ${st==='open'?`<button class="btn seal sm" data-act="bidOn" data-id="${c.id}">Build a bid</button>`:''}</div></article>`;}).join('');
-  $('#view').innerHTML=`${S.me||S.officer?`<div class="row between" style="margin-bottom:14px"><p class="muted" style="margin:0">Post an event your park or kingdom needs hosted. Autocrats build bids against each call.</p><button class="btn" data-act="newCall">Post a call for bids</button></div><div id="callForm"></div>`:''}
+  $('#view').innerHTML=`<div class="row between" style="margin-bottom:14px"><p class="muted" style="margin:0">Anyone can open an event to bids: post the event your park or kingdom needs hosted, and Autocrats build bids against it.</p><button class="btn" data-act="${S.me||S.officer?'newCall':'signIn'}">${S.me||S.officer?'Post a call for bids':'Sign in to post a call for bids'}</button></div>${S.me||S.officer?'<div id="callForm"></div>':''}
     <div class="panel" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px"><div style="max-width:62ch"><b>Hosting a kingdom-level event?</b> <span class="muted">Parks, households, companies and guilds bid to run events like Feast of the Gods, Feast of Fools and Feast of the Dead. No posted call needed. Your bid goes to the monarchy for approval.</span></div><button class="btn ghost" data-act="newBid">Start an event bid</button></div>
     ${chips}${list.length?`<div class="cgrid">${cards}</div>`:`<div class="empty"><h2>No calls for bids yet</h2><p>${S.me||S.officer?'Post the first one above.':'When your kingdom posts an event it needs hosted, it shows up here.'} You can still build an independent special-event bid from the Build a Bid tab.</p></div>`}`;
   if(S.callEdit!==undefined) renderCallForm();
@@ -734,6 +734,7 @@ document.addEventListener('click',async e=>{
   else if(a==='openBid'){go('bid',id);}
   else if(a==='bidOn'){startBid(id);}
   else if(a==='newBid'){startBid('');}
+  else if(a==='signIn'){location.assign('/signin?next='+encodeURIComponent(location.pathname+location.search));}
   else if(a==='newCall'){S.callEdit=null;render();$('#cTitle')?.focus();}
   else if(a==='editCall'){S.callEdit=id;S.view='calls';render();$('#callForm')?.scrollIntoView({behavior:'smooth'});}
   else if(a==='cancelCall'){S.callEdit=undefined;render();}
@@ -786,6 +787,7 @@ document.addEventListener('pointermove',e=>{const t=e.target.closest('[data-tip]
 document.addEventListener('focusin',e=>{const t=e.target.closest('[data-tip]');if(!t){$('#tip').hidden=true;return;}const r=t.getBoundingClientRect();showTip(t,r.left,r.bottom-10);});
 document.addEventListener('scroll',()=>{$('#tip').hidden=true;},{passive:true});
 /* ---------- boot ---------- */
+if(['calls','build','mine','archive','desk'].includes(deepView)){if(deepView==='build'&&!S.draft)S.draft=blankBid('');S.view=deepView;}
 render();
 (async()=>{
   const cl=window.claude;

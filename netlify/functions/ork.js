@@ -10,30 +10,8 @@
 // Feast preferences: the ORK web service doesn't expose them, and the key only works on /orkservice/*,
 // so FORK can fill in persona, park and kingdom, and players enter feast preferences on the form.
 
-const ORK_JSON = 'https://ork.amtgard.com/orkservice/Json/index.php';
-const CLIENT = process.env.ORK_CLIENT || 'FORK/1.0';
-const SITE = process.env.URL || 'https://amtgardfork.netlify.app';
-const UA = `${CLIENT} (+${SITE}${process.env.ORK_CONTACT ? `; ${process.env.ORK_CONTACT}` : ''})`;
-
-export class OrkBlocked extends Error {}
-
-/** One read-only call to the ORK web service (GET is fine: nothing secret goes in the URL). */
-export async function orkCall(call, request = {}, { key = process.env.ORK_API_KEY, fetchImpl = fetch } = {}) {
-  const u = new URL(ORK_JSON);
-  u.searchParams.set('call', call);
-  for (const [k, v] of Object.entries(request)) u.searchParams.set(`request[${k}]`, String(v));
-  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 8000);
-  try {
-    const r = await fetchImpl(u.toString(), {
-      signal: ctl.signal,
-      headers: { 'X-Ork-Key': key || '', 'X-ORK-Client': CLIENT, 'User-Agent': UA, Accept: 'application/json' },
-    });
-    const text = await r.text();
-    if (r.status === 403 || /<title>\s*Just a moment/i.test(text)) throw new OrkBlocked('blocked');
-    if (!r.ok) throw new Error(`ORK answered ${r.status}`);
-    return JSON.parse(text);
-  } finally { clearTimeout(t); }
-}
+import { orkCall, OrkBlocked } from './lib/orkClient.js';
+export { orkCall, OrkBlocked };
 
 export default async (req) => {
   const json = (body, status = 200, extra = {}) => new Response(JSON.stringify(body), {

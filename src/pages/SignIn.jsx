@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithPopup, isSignInWithEmailLink, signInWithEmailLink, sendSignInLinkToEmail } from 'firebase/auth';
+import { signInWithPopup, isSignInWithEmailLink, signInWithEmailLink, sendSignInLinkToEmail, signInWithCustomToken, updateProfile } from 'firebase/auth';
 import { auth, google, lower } from '../lib/firebase.js';
 import { Header, useApp } from '../App.jsx';
 
@@ -13,7 +13,24 @@ export default function SignIn() {
   const [state, setState] = useState('idle'); // idle | sent | confirm | busy
   const linkMode = isSignInWithEmailLink(auth, location.href);
 
-  useEffect(() => { if (user) nav('/crat', { replace: true }); }, [user, nav]);
+  // ?next=/herald/ (or another page on this site) sends people back where they came from.
+  const next = (() => { const n = new URLSearchParams(location.search).get('next') || ''; return /^\/(?!\/)/.test(n) ? n : '/crat'; })();
+  const go = () => (next.startsWith('/herald') ? location.assign(next) : nav(next, { replace: true }));
+  useEffect(() => { if (user) go(); }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+  const [ork, setOrk] = useState({ username: '', password: '', busy: false, err: '' });
+
+  async function withOrk(e) {
+    e.preventDefault(); setOrk(o => ({ ...o, busy: true, err: '' }));
+    try {
+      const r = await fetch('/api/ork-login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ username: ork.username, password: ork.password }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.token) throw new Error(j.error || 'ORK sign-in failed.');
+      const cred = await signInWithCustomToken(auth, j.token);
+      if (j.persona && cred.user.displayName !== j.persona) await updateProfile(cred.user, { displayName: j.persona }).catch(() => {});
+      setOrk({ username: '', password: '', busy: false, err: '' });
+      toast(`Welcome, ${j.persona || 'friend'}${j.officer ? ` (${j.officer})` : ''}.`);
+    } catch (err) { setOrk(o => ({ ...o, password: '', busy: false, err: err.message })); }
+  }
 
   useEffect(() => {
     if (!linkMode) return;
@@ -56,7 +73,18 @@ export default function SignIn() {
           <div className="note ok">Check <b>{email}</b> for a sign-in link. Open it on this device.</div>
         ) : (
           <div className="form">
-            <p className="muted">Crats sign in with the email their Autocrat invited. Park members don’t need an account to register for events.</p>
+            <p className="muted">Crats and event hosts sign in here. Park members don’t need an account to register for events.</p>
+            <form className="form note" onSubmit={withOrk}>
+              <b>Sign in with your ORK account</b>
+              <div className="row">
+                <div className="field"><label htmlFor="ou">ORK username</label><input id="ou" autoComplete="username" required value={ork.username} onChange={e => setOrk({ ...ork, username: e.target.value })} /></div>
+                <div className="field"><label htmlFor="op">ORK password</label><input id="op" type="password" autoComplete="current-password" required value={ork.password} onChange={e => setOrk({ ...ork, password: e.target.value })} /></div>
+              </div>
+              {ork.err && <div className="note bad" role="alert">{ork.err}</div>}
+              <div><button className="btn" disabled={ork.busy}>{ork.busy ? 'Checking with the ORK…' : 'Sign in with ORK'}</button></div>
+              <span className="hint">FORK passes your password straight to the ORK to confirm it’s you, and never stores or logs it. Current park and kingdom officers are recognized automatically.</span>
+            </form>
+            <div className="hint" style={{ textAlign: 'center' }}>or</div>
             <button className="btn" onClick={withGoogle} disabled={state === 'busy'}>Continue with Google</button>
             <div className="hint" style={{ textAlign: 'center' }}>or get a sign-in link by email</div>
             <form className="row" onSubmit={sendLink}>

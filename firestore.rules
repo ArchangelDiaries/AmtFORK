@@ -1,7 +1,7 @@
 rules_version = '2';
 // FORK security rules.
 //   events/{eid}                     public once published; Autocrat edits; Feastcrat edits `feast`; Warcrat edits `warmaster`; each crat edits their own `notes.<role>`
-//   access/{eid}                     private crat roster: roles by email, contacts, owner
+//   access/{eid}                     private crat roster: roles by email or ork:<number>, contacts, owner
 //   events/{eid}/schedule/{sid}      public once published; each track editable only by its crats
 //   events/{eid}/registrations/{rid} anyone can create while registration is open; crats read; Trollcrat checks in
 //   events/{eid}/feastPrefs/{rid}    dietary + allergen data: readable ONLY by Autocrat and Feastcrat
@@ -9,8 +9,12 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     function signedIn() { return request.auth != null; }
-    function verified() { return signedIn() && request.auth.token.email != null && request.auth.token.email_verified == true; }
-    function me() { return request.auth.token.email.lower(); }
+    // Two kinds of accounts: Google / email-link (keyed by lowercase email) and "Sign in with ORK"
+    // (custom token from /api/ork-login with an orkId claim, keyed by "ork:<ORK number>").
+    function orkUser() { return signedIn() && request.auth.token.get('orkId', '') != ''; }
+    function emailUser() { return signedIn() && request.auth.token.get('email', null) != null && request.auth.token.get('email_verified', false) == true; }
+    function verified() { return orkUser() || emailUser(); }
+    function me() { return orkUser() ? 'ork:' + string(request.auth.token.orkId) : request.auth.token.email.lower(); }
     function accPath(eid) { return /databases/$(database)/documents/access/$(eid); }
     function evPath(eid) { return /databases/$(database)/documents/events/$(eid); }
     function acc(eid) { return get(accPath(eid)).data; }
@@ -118,9 +122,12 @@ service cloud.firestore {
     // Anyone signed in can post a call for bids. The call's poster (its "host") and kingdom officers
     // manage it: edit, close bidding, record decisions, award, and keep private reviews of its bids.
     function heraldSignedIn() { return request.auth != null; }
+    // Kingdom officers: anyone signed in with ORK who currently holds a kingdom (or principality) office,
+    // as checked against the ORK at sign-in; or anyone listed by hand in herald_officers.
     function heraldOfficer() {
-      return heraldSignedIn() && request.auth.token.email != null &&
-        exists(/databases/$(database)/documents/herald_officers/$(request.auth.token.email.lower()));
+      return heraldSignedIn() && (request.auth.token.get('kingdomOfficer', false) == true
+        || (request.auth.token.get('email', null) != null &&
+            exists(/databases/$(database)/documents/herald_officers/$(request.auth.token.email.lower()))));
     }
     function heraldCall(id) { return get(/databases/$(database)/documents/herald_calls/$(id)).data; }
     // Is the signed-in person the host of the call this bid answers?
@@ -165,7 +172,7 @@ service cloud.firestore {
 
     // Officer list: each person can check only their own entry. Add officers in the console.
     match /herald_officers/{email} {
-      allow read: if heraldSignedIn() && request.auth.token.email.lower() == email;
+      allow read: if heraldSignedIn() && request.auth.token.get('email', '') != '' && request.auth.token.email.lower() == email;
       allow write: if false;
     }
 // ----- END Herald's Call -----

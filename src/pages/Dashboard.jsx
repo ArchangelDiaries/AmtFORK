@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { query, where, getDoc, doc } from 'firebase/firestore';
 import { db, lower } from '../lib/firebase.js';
 import { Header, useApp } from '../App.jsx';
+import { userKey, displayKey } from '../lib/identity.js';
 import { useQuery, col, createEvent, assignCrat, sendInvite } from '../lib/data.js';
 import { getBid, eventFromBid, linkBidToEvent, bidUrl, HERALD_URL, openCallForBids, callUrl } from '../lib/herald.js';
 import { fmtRange } from '../lib/util.js';
@@ -12,7 +13,7 @@ import EventTypeFields from '../components/EventTypeFields.jsx';
 export default function Dashboard() {
   const { user, toast } = useApp();
   const nav = useNavigate();
-  const email = lower(user.email);
+  const email = userKey(user);
   const acc = useQuery(() => query(col('access'), where('staffEmails', 'array-contains', email)), [email]);
   const [events, setEvents] = useState({});
   const [f, setF] = useState(null);
@@ -134,7 +135,7 @@ export default function Dashboard() {
         </div>
       ) : !f && (
         <div className="panel empty"><h2>No events yet</h2>
-          <p>Start a new event as its Autocrat, or ask your Autocrat to invite <b>{email}</b> as a crat. Invited events appear here automatically.</p></div>
+          <p>Start a new event as its Autocrat, or ask your Autocrat to add <b>{displayKey(email)}</b> as a crat. Invited events appear here automatically.</p></div>
       )}
     </div>
   );

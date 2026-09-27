@@ -5,6 +5,7 @@ import {
   serverTimestamp, addDoc, getDoc,
 } from 'firebase/firestore';
 import { auth, db, lower } from './firebase.js';
+import { userKey } from './identity.js';
 
 /* ---------- hooks ---------- */
 export function useAuth() {
@@ -46,7 +47,7 @@ export const blankEvent = () => ({
 
 export async function createEvent(user, data) {
   const ref = doc(col('events'));
-  const email = lower(user.email);
+  const email = userKey(user);   // email, or ork:<number> for ORK sign-ins
   const b = writeBatch(db);
   b.set(ref, { ...blankEvent(), ...data, ownerUid: user.uid,
     crats: { auto: { name: user.displayName || email } }, createdAt: serverTimestamp() });

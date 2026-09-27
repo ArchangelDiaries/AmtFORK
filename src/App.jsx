@@ -36,6 +36,7 @@ export function Header({ children }) {
       <nav className="nav">
         {children}
         <a className="btn ghost sm" href="/herald/">Calls for bids</a>
+        <a className="btn ghost sm" href="/herald/?view=build">Build a bid</a>
         {user ? <>
           <Link className="btn ghost sm" to="/crat">Crat Hall</Link>
           <button className="btn ghost sm" onClick={() => signOut(auth)}>Sign out</button>

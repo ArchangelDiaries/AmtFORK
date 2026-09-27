@@ -28,7 +28,10 @@
   async function isOfficer() {
     if (officer !== null) return officer;
     const u = await ready;
-    if (!u || !u.email) { officer = false; return false; }
+    if (!u) { officer = false; return false; }
+    // Signed in with ORK and currently a kingdom (or principality) officer, as checked at sign-in.
+    try { const t = await u.getIdTokenResult(); if (t.claims && t.claims.kingdomOfficer === true) { officer = true; return true; } } catch (e) {}
+    if (!u.email) { officer = false; return false; }
     try { officer = (await fs.doc(P + 'officers/' + u.email.toLowerCase()).get()).exists; }
     catch (e) { officer = false; }
     return officer;
@@ -60,7 +63,7 @@
     const btn = document.createElement('button');
     btn.className = u ? 'btn ghost sm' : 'btn sm';
     btn.textContent = u ? 'Sign out' : 'Sign in with Google';
-    btn.title = u ? ('Signed in as ' + (u.email || u.displayName || '')) : 'Sign in to build and submit bids';
+    btn.title = u ? ('Signed in as ' + (u.displayName || u.email || '')) : 'Sign in to build and submit bids';
     btn.addEventListener('click', async function () {
       try {
         if (u) await auth.signOut();
@@ -69,6 +72,12 @@
       } catch (e) { console.error(e); }
     });
     box.appendChild(btn);
+    if (!u) {  // Sign in with ORK happens on FORK's sign-in page, then comes back here (same site, same sign-in).
+      const ork = document.createElement('a');
+      ork.className = 'btn sm'; ork.textContent = 'Sign in with ORK';
+      ork.href = '/signin?next=' + encodeURIComponent(location.pathname + location.search);
+      box.appendChild(ork);
+    }
     top.appendChild(box);
   }
   ready.then(function (u) {

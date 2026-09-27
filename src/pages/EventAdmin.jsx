@@ -6,6 +6,7 @@ import { useDoc, useQuery, col } from '../lib/data.js';
 import { fmtRange } from '../lib/util.js';
 import { ROLE, eventType, eventHost } from '../lib/constants.js';
 import { bidUrl } from '../lib/herald.js';
+import { userKey, displayKey } from '../lib/identity.js';
 import Overview from './admin/Overview.jsx';
 import Crats from './admin/Crats.jsx';
 import ScheduleAdmin from './admin/ScheduleAdmin.jsx';
@@ -28,7 +29,7 @@ export default function EventAdmin() {
   const [tab, setTab] = useState(() => { try { return localStorage.getItem('fork.tab') || 'overview'; } catch (e) { return 'overview'; } });
   useEffect(() => { try { localStorage.setItem('fork.tab', tab); } catch (e) { /* ignore */ } }, [tab]);
 
-  const me = lower(user.email);
+  const me = userKey(user);
   const isOwner = acc.data?.ownerUid === user.uid;
   const roles = acc.data?.roles?.[me] || [];
   const isAuto = isOwner || roles.includes('auto');
@@ -40,7 +41,7 @@ export default function EventAdmin() {
   if (ev.loading || acc.loading) return <div className="wrap"><Header /><p className="muted">Loading…</p></div>;
   if (!ev.data || !acc.data) return (
     <div className="wrap"><Header /><div className="panel empty"><h2>No access</h2>
-      <p>This event doesn’t exist, or <b>{me}</b> isn’t one of its crats. Ask the Autocrat to invite this address.</p>
+      <p>This event doesn’t exist, or <b>{displayKey(me)}</b> isn’t one of its crats. Ask the Autocrat to invite this address.</p>
       <Link className="btn" to="/crat">Back to Crat Hall</Link></div></div>);
 
   const e = ev.data;

@@ -73,6 +73,27 @@ The Warcrat (or Autocrat) can create the event's Warmaster Tournament in Field M
 
 No changes to Field Marshal are needed. FORK uses its existing tournament and signup-request formats.
 
+## Sign in with ORK
+Players can sign in to FORK and The Herald's Call with their **ORK username and password**, as well as with Google or an email link.
+
+**How it works**
+- `netlify/functions/ork-login.js` sends the username and password to the ORK (`Authorization/Authorize`) in a POST body with FORK's ORK key. The ORK session is closed right away with `DestroySession`, and the password is never stored or logged.
+- It looks up the player (`Player/GetPlayer`, `Park/GetParkShortInfo`) and today's officers of their park, their kingdom or principality, and its parent kingdom (`Park/GetOfficers`, `Kingdom/GetOfficers`).
+- It returns a Firebase custom token for user `ork_<ORK number>`, carrying claims `orkId`, `persona`, `kingdomOfficer`, `parkOfficer` and `officerTitles`. The token is signed with FORK's service account.
+- **Kingdom officers need no setup.** Anyone who currently holds a kingdom or principality office in the ORK is treated as a kingdom officer in The Herald's Call, and can manage every call. Office is re-checked at every sign-in, so reign changes take care of themselves. The `herald_officers` list still works for Google accounts.
+- **Crats can be added by ORK number.** In the Crats tab, enter an email *or* an ORK number or profile link. ORK crats sign in with **Sign in with ORK**, and "Save & copy invite" gives you a message to send them.
+- **Throttling:** the ORK has no lockout and waives rate limits for FORK's key. So FORK allows 5 failed attempts per username and 20 per IP address in any 15 minutes, tracked in Netlify Blobs.
+
+**Setup (one time)**
+1. **Firebase console** (project **amtfork**): go to **Project settings → Service accounts → Generate new private key**. A JSON file downloads. Treat it like a password; don't commit it or email it.
+2. **Netlify → amtgardfork → Environment variables**, scope **Functions**, marked secret. Add these, copied from the JSON file:
+   - `FIREBASE_CLIENT_EMAIL` = the `client_email` value
+   - `FIREBASE_PRIVATE_KEY` = the `private_key` value, including the BEGIN/END lines. The `\n` sequences are fine as-is.
+   Then delete the downloaded JSON file.
+3. Netlify limits the settings a function can see to 4 KB in total. Set the scope of the `VITE_*` settings to **Builds** only; functions don't need them.
+4. **Re-publish `firestore.rules`.** They now accept ORK sign-ins (crat key `ork:<number>`) and ORK-verified kingdom officers.
+5. Redeploy.
+
 ## Bids to events: The Herald's Call
 FORK covers the whole event life cycle. **Anyone signed in can create an event**, and the New event form asks **"Open this event to bids?"**:
 
